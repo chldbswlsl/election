@@ -46,10 +46,11 @@ TARGETS = [
 ]
 
 
-def fetch_html(url, timeout=45000):
-    """Playwright 로 진짜 브라우저 사용해 Cloudflare 우회"""
+def fetch_html(url, timeout=60000):
+    """Playwright 로 진짜 브라우저 사용해 Cloudflare 우회. 디버그 정보 출력."""
     from playwright.sync_api import sync_playwright
 
+    print(f"    [fetch] launching chromium...")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -60,12 +61,52 @@ def fetch_html(url, timeout=45000):
             viewport={"width": 1280, "height": 900},
         )
         page = context.new_page()
-        page.goto(url, wait_until="domcontentloaded", timeout=timeout)
-        # Cloudflare 챌린지 대기 (잠시)
-        page.wait_for_timeout(3000)
+        print(f"    [fetch] goto {url[:80]}...")
+        resp = page.goto(url, wait_until="domcontentloaded", timeout=timeout)
+        status = resp.status if resp else 0
+        print(f"    [fetch] HTTP {status}, waiting for Cloudflare/render...")
+
+        # Cloudflare 챌린지가 끝날 때까지 더 길게 대기 + 실 콘텐츠 셀렉터 기다림
+        page.wait_for_timeout(8000)
+        try:
+            # 나무위키 본문 컨테이너 셀렉터 후보들
+            page.wait_for_selector(
+                "div.wiki-paragraph, article, .wiki-content, table",
+                timeout=15000,
+            )
+            print(f"    [fetch] content selector found")
+        except Exception as e:
+            print(f"    [fetch] selector timeout (계속 진행): {e}")
+
+        page.wait_for_timeout(2000)  # 추가 안정화
         html = page.content()
+        title = page.title()
         browser.close()
+        print(f"    [fetch] done. title={title!r}, html_len={len(html):,}")
         return html
+
+
+def save_debug(city, html):
+    """디버그 위해 HTML 일부 + 테이블 개수 저장 (workflow artifact 로 업로드)"""
+    from bs4 import BeautifulSoup
+    debug_dir = ROOT / "debug"
+    debug_dir.mkdir(exist_ok=True)
+
+    soup = BeautifulSoup(html, "lxml")
+    n_tables = len(soup.find_all("table"))
+
+    safe_name = city.replace("/", "_")
+    (debug_dir / f"{safe_name}.html").write_text(html, encoding="utf-8")
+    summary = (
+        f"city: {city}\n"
+        f"html_len: {len(html):,}\n"
+        f"tables_found: {n_tables}\n"
+        f"title: {soup.title.string if soup.title else '(no title)'}\n"
+        f"body_text_first_500:\n{soup.get_text(' ', strip=True)[:500]}\n"
+    )
+    (debug_dir / f"{safe_name}.txt").write_text(summary, encoding="utf-8")
+    print(f"    [debug] tables={n_tables}, html→debug/{safe_name}.html")
+    return n_tables
 
 
 def parse_polls(html, target):
@@ -167,8 +208,11 @@ def main():
                 page_hash_changed = True
             hashes[tgt["city"]] = new_hash
 
+            # 디버그 — html 저장 + 테이블 개수 확인
+            n_tables = save_debug(tgt["city"], html)
+
             polls = parse_polls(html, tgt)
-            print(f"  파싱: {len(polls)} 건 발견")
+            print(f"  파싱: {len(polls)} 건 발견 (전체 테이블 {n_tables}개 중)")
             for p in polls:
                 key = (p["city"], p["date"], p["pollster"])
                 if key not in existing_keys:

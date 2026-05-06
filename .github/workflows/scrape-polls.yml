@@ -57,6 +57,16 @@ jobs:
         continue-on-error: true
         run: python scripts/scrape_namu.py
 
+      # 디버그 — 매번 HTML/요약 artifact 업로드 (Cloudflare 차단·파싱 실패 분석용)
+      - name: Upload debug artifacts
+        if: always() && steps.blackout.outputs.blackout != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scrape-debug-${{ github.run_number }}
+          path: debug/
+          retention-days: 7
+          if-no-files-found: ignore
+
       # 새 폴 발견 시 PR 자동 생성
       - name: Create PR (new polls)
         if: steps.scrape.outputs.has_new == 'true'
