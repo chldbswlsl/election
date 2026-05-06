@@ -134,6 +134,19 @@
   .badge.in  { background: #fef3c7; color: #92400e; }
   .badge.out { background: #d1fae5; color: #065f46; }
 
+  /* 공표금지 배너 */
+  .blackout-banner {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b; border-radius: 12px;
+    padding: 18px 22px; margin-bottom: 22px;
+    display: flex; gap: 16px; align-items: flex-start;
+    box-shadow: 0 4px 12px rgba(245,158,11,.15);
+  }
+  .blackout-icon { font-size: 32px; line-height: 1; }
+  .blackout-banner strong { color: #92400e; font-size: 15px; }
+  .blackout-sub { color: #78350f; font-size: 13px; margin-top: 6px; }
+  .blackout-sub em { background: rgba(255,255,255,.6); padding: 1px 5px; border-radius: 3px; font-style: normal; }
+
   .formula {
     background: #f9fafb; border-left: 3px solid var(--accent);
     padding: 10px 14px; font-family: 'Consolas', 'Courier New', monospace;
@@ -176,6 +189,18 @@
 </head>
 <body>
 <div class="container">
+
+<!-- 공표금지 기간 배너 (5/28 0시 ~ 6/3 18시) -->
+<div id="blackout-banner" class="blackout-banner" hidden>
+  <div class="blackout-icon">⚠</div>
+  <div>
+    <strong>공직선거법 §108 — 여론조사 공표금지 기간</strong>
+    <div class="blackout-sub">
+      선거일 6일 전부터 투표 마감(6/3 18:00)까지 새 여론조사 결과의 공표·보도가 금지됩니다.
+      이 기간 동안 사이트는 <em>마지막 갱신 시점까지의 기존 데이터</em>만 표시하며, 자동 업데이트도 중단됩니다.
+    </div>
+  </div>
+</div>
 
 <header>
   <div class="hero-top">
@@ -324,6 +349,18 @@ const EMBEDDED = {
 let POLLS = [];
 let LAST_UPDATED = null;
 let DATA_SOURCE = "embedded";  // "live" | "embedded"
+
+// 공표금지 기간 체크 (KST 기준 5/28 00:00 ~ 6/3 18:00)
+function checkBlackout() {
+  const now = new Date();
+  // KST = UTC + 9
+  const kst = new Date(now.getTime() + (now.getTimezoneOffset() + 9*60) * 60000);
+  const start = new Date("2026-05-28T00:00:00+09:00");
+  const end   = new Date("2026-06-03T18:00:00+09:00");
+  const inBlackout = now >= start && now <= end;
+  document.getElementById("blackout-banner").hidden = !inBlackout;
+  return inBlackout;
+}
 
 async function loadData() {
   const status = document.getElementById("data-status");
@@ -749,6 +786,7 @@ function renderAll() {
 async function refresh() {
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("loading");
+  checkBlackout();    // 공표금지 배너 갱신
   await loadData();
   renderAll();
   setTimeout(() => btn.classList.remove("loading"), 350);

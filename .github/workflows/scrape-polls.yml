@@ -1,0 +1,113 @@
+name: Daily poll scrape
+
+on:
+  schedule:
+    # 매일 00:00 UTC = 09:00 KST
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # 수동 실행 가능
+
+# 최소 권한
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # 공직선거법 §108 — 5/28 ~ 6/3 18:00 사이 공표 금지 → 작업 중단
+      - name: Check 공표금지 blackout
+        id: blackout
+        run: |
+          today=$(TZ=Asia/Seoul date +%s)
+          start=$(TZ=Asia/Seoul date -d "2026-05-28 00:00" +%s)
+          end=$(TZ=Asia/Seoul date -d "2026-06-03 18:00" +%s)
+          if [ "$today" -ge "$start" ] && [ "$today" -le "$end" ]; then
+            echo "::warning::공표금지 기간 — 작업 중단"
+            echo "blackout=true" >> $GITHUB_OUTPUT
+          else
+            echo "blackout=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout
+        if: steps.blackout.outputs.blackout != 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        if: steps.blackout.outputs.blackout != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        if: steps.blackout.outputs.blackout != 'true'
+        run: |
+          pip install playwright beautifulsoup4 lxml
+
+      - name: Install Chromium for Playwright
+        if: steps.blackout.outputs.blackout != 'true'
+        run: |
+          python -m playwright install chromium --with-deps
+
+      - name: Scrape namuwiki
+        if: steps.blackout.outputs.blackout != 'true'
+        id: scrape
+        continue-on-error: true
+        run: python scripts/scrape_namu.py
+
+      # 새 폴 발견 시 PR 자동 생성
+      - name: Create PR (new polls)
+        if: steps.scrape.outputs.has_new == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "auto: 새 여론조사 ${{ steps.scrape.outputs.new_count }}건 자동 추가"
+          title: "[자동] 새 여론조사 ${{ steps.scrape.outputs.new_count }}건 — 검토 후 머지"
+          body: |
+            나무위키에서 새 여론조사 **${{ steps.scrape.outputs.new_count }}건**을 자동 감지했습니다.
+
+            ⚠ **머지 전 반드시 확인하세요:**
+            - `polls.json` 의 새 항목들이 정확한지
+            - candDem/candPP 가 후보와 매칭되는지 (휴리스틱 파싱이라 뒤집힐 수 있음)
+            - 표본수 n 이 합리적인지
+
+            상세 결과는 위 워크플로우 실행의 Summary 탭 참고.
+
+            ---
+            🤖 자동 생성된 PR (`scripts/scrape_namu.py`)
+          branch: auto/poll-update
+          delete-branch: true
+          labels: automation, polls
+
+      # 파싱 실패 시 issue 생성 (한 번만)
+      - name: Create issue on parse failure
+        if: steps.scrape.outputs.parse_failed == 'true' && steps.scrape.outputs.has_new != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'scraper-failure',
+            });
+            // 같은 라벨의 미해결 issue 가 이미 있으면 새로 만들지 않음
+            if (issues.data.length > 0) {
+              console.log('이미 미해결 scraper-failure issue 존재 → 건너뜀');
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '[자동] 나무위키 스크레이퍼 파싱 실패',
+              body: '`scripts/scrape_namu.py` 가 한 곳 이상의 도시에서 파싱에 실패했습니다.\n\n워크플로우 Summary 확인하세요.',
+              labels: ['scraper-failure'],
+            });
+
+      # hash 만 변경되고 새 폴 감지는 안 된 경우 — 알림용 코멘트
+      - name: Notice page changed but no new polls parsed
+        if: steps.scrape.outputs.hash_changed == 'true' && steps.scrape.outputs.has_new != 'true'
+        run: |
+          echo "::notice::나무위키 페이지가 변경되었지만 새 폴은 감지되지 않았습니다 (단순 편집일 수 있음)"
