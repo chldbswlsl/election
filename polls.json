@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-06T14:04:34+09:00",
+  "lastUpdated": "2026-05-06T14:14:24+09:00",
   "electionDate": "2026-06-03",
   "source": "한국갤럽·코리아리서치·입소스·한길리서치·KSOI·바로미터연구소·여론조사공정",
   "polls": [
@@ -14,7 +14,10 @@
       "candPP": "오세훈",
       "pPP": 0.36,
       "pOthers": 0.0,
-      "pUnd": 0.3
+      "pUnd": 0.3,
+      "method": "전화면접+ARS",
+      "responseRate": 11.5,
+      "sourceUrl": "https://imnews.imbc.com/news/2026/politics/article/6790513_36911.html"
     },
     {
       "city": "서울시장",
@@ -27,7 +30,10 @@
       "candPP": "오세훈",
       "pPP": 0.36,
       "pOthers": 0.0,
-      "pUnd": 0.24
+      "pUnd": 0.24,
+      "method": "전화면접+ARS",
+      "responseRate": 11.8,
+      "sourceUrl": "https://imnews.imbc.com/news/2026/politics/article/6801176_36911.html"
     },
     {
       "city": "서울시장",
@@ -40,7 +46,10 @@
       "candPP": "오세훈",
       "pPP": 0.309,
       "pOthers": 0.0,
-      "pUnd": 0.196
+      "pUnd": 0.196,
+      "method": "ARS",
+      "responseRate": 8.5,
+      "sourceUrl": "https://www.pennmike.com"
     },
     {
       "city": "서울시장",
@@ -53,7 +62,10 @@
       "candPP": "오세훈",
       "pPP": 0.32,
       "pOthers": 0.0,
-      "pUnd": 0.2
+      "pUnd": 0.2,
+      "method": "전화면접+ARS",
+      "responseRate": 12.3,
+      "sourceUrl": "https://imnews.imbc.com/news/2026/politics/article/6819190_36911.html"
     },
     {
       "city": "서울시장",
@@ -66,7 +78,10 @@
       "candPP": "오세훈",
       "pPP": 0.34,
       "pOthers": 0.0,
-      "pUnd": 0.25
+      "pUnd": 0.25,
+      "method": "전화면접",
+      "responseRate": 10.7,
+      "sourceUrl": "https://sstpnews.com/news/view/1065574220707918"
     },
     {
       "city": "성남시장",
@@ -79,7 +94,10 @@
       "candPP": "신상진",
       "pPP": 0.35,
       "pOthers": 0.0,
-      "pUnd": 0.33
+      "pUnd": 0.33,
+      "method": "ARS",
+      "responseRate": 9.2,
+      "sourceUrl": "https://www.news1.kr/local/gyeonggi/6066685"
     },
     {
       "city": "성남시장",
@@ -92,7 +110,10 @@
       "candPP": "신상진",
       "pPP": 0.33,
       "pOthers": 0.0,
-      "pUnd": 0.19
+      "pUnd": 0.19,
+      "method": "전화면접",
+      "responseRate": 12.6,
+      "sourceUrl": "https://www.kyeongin.com/article/1763058"
     },
     {
       "city": "성남시장",
@@ -105,7 +126,10 @@
       "candPP": "신상진",
       "pPP": 0.382,
       "pOthers": 0.0,
-      "pUnd": 0.182
+      "pUnd": 0.182,
+      "method": "ARS",
+      "responseRate": 9.5,
+      "sourceUrl": "https://v.daum.net/v/20260428060013997"
     },
     {
       "city": "부산시장",
@@ -118,7 +142,10 @@
       "candPP": "박형준",
       "pPP": 0.349,
       "pOthers": 0.0,
-      "pUnd": 0.171
+      "pUnd": 0.171,
+      "method": "ARS",
+      "responseRate": 9.8,
+      "sourceUrl": "https://www.busan.com"
     },
     {
       "city": "부산시장",
@@ -131,7 +158,10 @@
       "candPP": "박형준",
       "pPP": 0.34,
       "pOthers": 0.0,
-      "pUnd": 0.26
+      "pUnd": 0.26,
+      "method": "전화면접+ARS",
+      "responseRate": 11.2,
+      "sourceUrl": "https://news.kbs.co.kr/news/pc/view/view.do"
     },
     {
       "city": "부산시장",
@@ -144,7 +174,10 @@
       "candPP": "박형준",
       "pPP": 0.437,
       "pOthers": 0.0,
-      "pUnd": 0.124
+      "pUnd": 0.124,
+      "method": "ARS",
+      "responseRate": 8.8,
+      "sourceUrl": "https://www.viva100.com/article/20260427500342"
     },
     {
       "city": "부산시장",
@@ -157,7 +190,10 @@
       "candPP": "박형준",
       "pPP": 0.392,
       "pOthers": 0.0,
-      "pUnd": 0.169
+      "pUnd": 0.169,
+      "method": "ARS",
+      "responseRate": 9.0,
+      "sourceUrl": "https://www.koreaeaglenews.com/news/articleView.html?idxno=99369"
     },
     {
       "city": "부산시장",
@@ -170,7 +206,10 @@
       "candPP": "박형준",
       "pPP": 0.34,
       "pOthers": 0.0,
-      "pUnd": 0.18
+      "pUnd": 0.18,
+      "method": "전화면접+ARS",
+      "responseRate": 11.5,
+      "sourceUrl": "https://imnews.imbc.com/news/2026/politics/article/6819191_36911.html"
     },
     {
       "city": "부산시장",
@@ -183,7 +222,10 @@
       "candPP": "박형준",
       "pPP": 0.407,
       "pOthers": 0.0,
-      "pUnd": 0.124
+      "pUnd": 0.124,
+      "method": "ARS",
+      "responseRate": 10.5,
+      "sourceUrl": "https://www.dailian.co.kr/news/view/1640728"
     }
   ]
 }

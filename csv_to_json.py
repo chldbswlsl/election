@@ -34,6 +34,9 @@ def main():
                 "pPP": p_pp,
                 "pOthers": p_others,
                 "pUnd": p_und,
+                "method": row.get("method") or "?",
+                "responseRate": float(row["response_rate"]) if row.get("response_rate") else None,
+                "sourceUrl": row.get("source_url") or "",
             })
 
     payload = {
