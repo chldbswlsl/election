@@ -17,6 +17,11 @@ def main():
     polls = []
     with open(CSV_PATH, encoding="utf-8") as f:
         for row in csv.DictReader(f):
+            p_dem = float(row["p_dem"])
+            p_pp = float(row["p_pp"])
+            p_others = float(row.get("p_others") or 0.0)
+            # 부동층 = 1 - 양당 - 기타 (응답 거부·미정 포함)
+            p_und = max(0.0, round(1.0 - p_dem - p_pp - p_others, 4))
             polls.append({
                 "city": row["city"],
                 "date": row["date"],
@@ -24,9 +29,11 @@ def main():
                 "client": row["client"],
                 "n": int(row["n"]),
                 "candDem": row["cand_dem"],
-                "pDem": float(row["p_dem"]),
+                "pDem": p_dem,
                 "candPP": row["cand_pp"],
-                "pPP": float(row["p_pp"]),
+                "pPP": p_pp,
+                "pOthers": p_others,
+                "pUnd": p_und,
             })
 
     payload = {

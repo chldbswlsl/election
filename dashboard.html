@@ -91,7 +91,7 @@
 
   /* --- KPI cards --- */
   .kpi-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;
     margin-bottom: 22px;
   }
   .kpi {
@@ -108,6 +108,33 @@
   .kpi.pp .value { color: var(--pp); }
   .kpi.diff .value { color: #16a34a; }
   .kpi.pval .value { color: #7c3aed; font-size: 20px; }
+  .kpi.und .value { color: #d97706; }
+  .kpi .raw-comp { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .kpi .raw-comp.diff-up   { color: #16a34a; }
+  .kpi .raw-comp.diff-down { color: #dc2626; }
+
+  /* --- Swing scenarios --- */
+  .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+  .scenario {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .scenario .lbl { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .scenario .row {
+    display: flex; justify-content: space-between; margin-top: 6px;
+    font-size: 14px; font-weight: 600;
+  }
+  .scenario .row.dem { color: var(--dem); }
+  .scenario .row.pp  { color: var(--pp); }
+  .scenario .bar {
+    height: 6px; background: var(--border); border-radius: 3px; margin-top: 8px;
+    display: flex; overflow: hidden;
+  }
+  .scenario .bar .b-dem { background: var(--dem); }
+  .scenario .bar .b-pp  { background: var(--pp); }
+  .scenario.opt   { border-color: rgba(46,125,215,.5); }
+  .scenario.even  { border-color: var(--border); }
+  .scenario.pess  { border-color: rgba(224,49,49,.4); }
 
   /* --- Cards --- */
   .card {
@@ -229,6 +256,13 @@
 <!-- KPI -->
 <div class="kpi-grid" id="kpi-grid"></div>
 
+<!-- 부동층 결집 시나리오 -->
+<div class="card" style="padding: 20px 22px;">
+  <h2 style="margin-bottom: 6px;">⚡ 부동층 결집 시나리오 <span class="pdf-tag">2종 오류 대비</span></h2>
+  <p class="desc">부동층(미정·응답거부)이 어느 후보로 흘러가느냐에 따라 최종 득표율이 어떻게 변하는지. 균등 분할 가정이 가장 일반적이지만, 막판 결집 방향이 결과를 뒤집을 수 있음.</p>
+  <div class="scenarios" id="scenarios"></div>
+</div>
+
 <!-- Chart 1: Trend -->
 <div class="card">
   <h2>① 후보 지지율 추세 <span class="pdf-tag">PDF p44 모비율 추정</span></h2>
@@ -265,6 +299,9 @@
     <thead>
       <tr><th>조사일</th><th>의뢰처</th><th>조사기관</th><th>n</th>
           <th id="th-dem">민주당</th><th id="th-pp">국민의힘</th>
+          <th>부동층</th>
+          <th title="House effect 의뢰처 가중치">House w</th>
+          <th title="시간 감쇠 가중치">Time w</th>
           <th>차이</th><th>판정</th></tr>
     </thead>
     <tbody id="data-table"></tbody>
@@ -294,11 +331,26 @@ p-value = 1 - Φ(Z)</div>
       <strong>중심극한정리 (p28)</strong>
       <div class="formula">σ(X̄) = σ / √n
 → 표본 4배 = 폭 1/2</div>
+      <strong>가중 Poll-of-polls (메타분석)</strong>
+      <div class="formula">W_i = n_i × HouseW_i × TimeW_i
+TimeW = 0.5 ^ (days_ago / 30)
+n_eff = ΣW_i</div>
     </div>
   </div>
   <details>
     <summary>왜 1.96 인가? (PDF p15 표준정규분포)</summary>
     표준정규분포에서 양쪽 꼬리 합 5%를 잘라낼 때 |Z|=1.96. 표에서 P(0 ≤ Z ≤ 1.96) = 0.475 → 양쪽 합쳐 0.95. "욕먹지 않을 만큼"의 95% 신뢰수준 (PDF p9).
+  </details>
+  <details>
+    <summary>House Effect / 시간 감쇠 / 부동층 — 메타분석 보정 (NEW)</summary>
+    <p><strong>의뢰처 가중치 (House Effect)</strong> — 미국 538.com 등이 사용하는 방식.
+    의뢰처마다 일관된 편향이 있을 수 있어, 신뢰도가 낮은 곳은 가중치를 줄임.
+    예: 펜앤마이크 의뢰(여론조사공정) → 0.5 / 일반 메이저 → 1.0</p>
+    <p><strong>시간 감쇠 (반감기 30일)</strong> — 오래된 조사일수록 현재 민심을 덜 반영.
+    weight = 0.5^(days_ago / 30). 60일 전 조사 → 25% 가중치.</p>
+    <p><strong>통합 가중치</strong>: $W_i = n_i × \text{HouseW}_i × \text{TimeW}_i$ → Poll-of-polls 평균</p>
+    <p><strong>부동층 결집</strong> (PDF p60 2종 오류) — 부동층(미정·응답거부)이 어느 후보로 흘러가느냐가
+    예측을 뒤집을 수 있어, 70:30 / 50:50 / 30:70 세 시나리오를 함께 표시.</p>
   </details>
 </div>
 
@@ -326,25 +378,50 @@ p-value = 1 - Φ(Z)</div>
 // 1) 기본은 polls.json 에서 fetch → 데이터 갈아끼우기 쉬움
 // 2) fetch 실패 (file:// 직접 열기 등) 시 embedded 로 fallback
 
+// 모든 폴은 pOthers (제3후보 합) + pUnd (부동층) 자동 계산.
+// pUnd = 1 - pDem - pPP - pOthers
 const EMBEDDED = {
-  lastUpdated: "2026-05-06T11:34:00+09:00",
+  lastUpdated: "2026-05-06T14:00:00+09:00",
   polls: [
-    {city:"서울시장", date:"2025-12-15", pollster:"코리아리서치", client:"MBC", n:800,  candDem:"정원오", pDem:0.340, candPP:"오세훈", pPP:0.360},
-    {city:"서울시장", date:"2026-02-10", pollster:"코리아리서치", client:"MBC", n:800,  candDem:"정원오", pDem:0.400, candPP:"오세훈", pPP:0.360},
-    {city:"서울시장", date:"2026-04-20", pollster:"여론조사공정",   client:"펜앤마이크", n:1000, candDem:"정원오", pDem:0.495, candPP:"오세훈", pPP:0.309},
-    {city:"서울시장", date:"2026-04-28", pollster:"코리아리서치", client:"MBC", n:800,  candDem:"정원오", pDem:0.480, candPP:"오세훈", pPP:0.320},
-    {city:"서울시장", date:"2026-05-02", pollster:"입소스",       client:"SBS", n:800,  candDem:"정원오", pDem:0.410, candPP:"오세훈", pPP:0.340},
-    {city:"성남시장", date:"2026-02-09", pollster:"한길리서치",   client:"뉴스1",   n:503, candDem:"김병욱", pDem:0.320, candPP:"신상진", pPP:0.350},
-    {city:"성남시장", date:"2026-04-04", pollster:"한국갤럽",     client:"경인일보", n:503, candDem:"김병욱", pDem:0.480, candPP:"신상진", pPP:0.330},
-    {city:"성남시장", date:"2026-04-26", pollster:"한길리서치",   client:"인천일보", n:503, candDem:"김병욱", pDem:0.436, candPP:"신상진", pPP:0.382},
-    {city:"부산시장", date:"2026-04-04", pollster:"한길리서치",     client:"부산일보",   n:1004, candDem:"전재수", pDem:0.480, candPP:"박형준", pPP:0.349},
-    {city:"부산시장", date:"2026-04-19", pollster:"KSOI",          client:"KBS부산",   n:1000, candDem:"전재수", pDem:0.400, candPP:"박형준", pPP:0.340},
-    {city:"부산시장", date:"2026-04-25", pollster:"제이투인사이트랩", client:"-",         n:1000, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.437},
-    {city:"부산시장", date:"2026-04-26", pollster:"바로미터연구소",  client:"-",         n:1010, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.392},
-    {city:"부산시장", date:"2026-04-29", pollster:"코리아리서치",    client:"MBC",       n:800,  candDem:"전재수", pDem:0.480, candPP:"박형준", pPP:0.340},
-    {city:"부산시장", date:"2026-05-02", pollster:"한길리서치",     client:"부산MBC",   n:800,  candDem:"전재수", pDem:0.469, candPP:"박형준", pPP:0.407},
+    {city:"서울시장", date:"2025-12-15", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.340, candPP:"오세훈", pPP:0.360, pOthers:0, pUnd:0.300},
+    {city:"서울시장", date:"2026-02-10", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.400, candPP:"오세훈", pPP:0.360, pOthers:0, pUnd:0.240},
+    {city:"서울시장", date:"2026-04-20", pollster:"여론조사공정",     client:"펜앤마이크", n:1000, candDem:"정원오", pDem:0.495, candPP:"오세훈", pPP:0.309, pOthers:0, pUnd:0.196},
+    {city:"서울시장", date:"2026-04-28", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.480, candPP:"오세훈", pPP:0.320, pOthers:0, pUnd:0.200},
+    {city:"서울시장", date:"2026-05-02", pollster:"입소스",          client:"SBS",       n:800,  candDem:"정원오", pDem:0.410, candPP:"오세훈", pPP:0.340, pOthers:0, pUnd:0.250},
+    {city:"성남시장", date:"2026-02-09", pollster:"한길리서치",       client:"뉴스1",     n:503,  candDem:"김병욱", pDem:0.320, candPP:"신상진", pPP:0.350, pOthers:0, pUnd:0.330},
+    {city:"성남시장", date:"2026-04-04", pollster:"한국갤럽",         client:"경인일보",   n:503,  candDem:"김병욱", pDem:0.480, candPP:"신상진", pPP:0.330, pOthers:0, pUnd:0.190},
+    {city:"성남시장", date:"2026-04-26", pollster:"한길리서치",       client:"인천일보",   n:503,  candDem:"김병욱", pDem:0.436, candPP:"신상진", pPP:0.382, pOthers:0, pUnd:0.182},
+    {city:"부산시장", date:"2026-04-04", pollster:"한길리서치",       client:"부산일보",   n:1004, candDem:"전재수", pDem:0.480, candPP:"박형준", pPP:0.349, pOthers:0, pUnd:0.171},
+    {city:"부산시장", date:"2026-04-19", pollster:"KSOI",            client:"KBS부산",   n:1000, candDem:"전재수", pDem:0.400, candPP:"박형준", pPP:0.340, pOthers:0, pUnd:0.260},
+    {city:"부산시장", date:"2026-04-25", pollster:"제이투인사이트랩", client:"-",         n:1000, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.437, pOthers:0, pUnd:0.124},
+    {city:"부산시장", date:"2026-04-26", pollster:"바로미터연구소",   client:"-",         n:1010, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.392, pOthers:0, pUnd:0.169},
+    {city:"부산시장", date:"2026-04-29", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"전재수", pDem:0.480, candPP:"박형준", pPP:0.340, pOthers:0, pUnd:0.180},
+    {city:"부산시장", date:"2026-05-02", pollster:"한길리서치",       client:"부산MBC",   n:800,  candDem:"전재수", pDem:0.469, candPP:"박형준", pPP:0.407, pOthers:0, pUnd:0.124},
   ]
 };
+
+// House Effect (의뢰처 편향) 가중치 — 메타분석에서 538.com 등이 사용하는 방식
+// 기본 1.0, 의심스러운 의뢰처는 < 1.0 으로 디스카운트
+const POLLSTER_WEIGHTS = {
+  "여론조사공정": 0.5,    // 펜앤마이크(보수) 의뢰. 후보 친화적 결과 나옴
+  "제이투인사이트랩": 0.7, // 알려지지 않은 곳
+  "바로미터연구소": 0.7,
+  // default 1.0
+};
+function pollsterWeight(p) { return POLLSTER_WEIGHTS[p.pollster] ?? 1.0; }
+
+// 시간 감쇠 — 30일 반감기 (예: 60일 전 조사 → 25% 가중치)
+const HALF_LIFE_DAYS = 30;
+function timeWeight(pollDate, asOf=new Date()) {
+  const d = new Date(pollDate);
+  const days = Math.max(0, (asOf - d) / 86400000);
+  return Math.pow(0.5, days / HALF_LIFE_DAYS);
+}
+
+// 통합 가중치: 표본수 × 의뢰처 가중 × 시간 감쇠
+function effectiveN(p, asOf=new Date()) {
+  return p.n * pollsterWeight(p) * timeWeight(p.date, asOf);
+}
 
 let POLLS = [];
 let LAST_UPDATED = null;
@@ -414,20 +491,43 @@ const fmtPct = x => (x*100).toFixed(1) + "%";
 
 let currentCity = "서울시장";
 
-// ============== 도시별 통계 요약 ==============
+// ============== 도시별 통계 요약 (가중치 적용) ==============
+// W_eff = sum(n_i × pollster_weight_i × time_weight_i)
+// 가중평균 + 부동층 + 결집 시나리오까지 계산
 function citySummary(city) {
   const polls = POLLS.filter(p => p.city === city);
-  const W = polls.reduce((s,p) => s + p.n, 0);
-  const pDem = polls.reduce((s,p) => s + p.pDem * p.n, 0) / W;
-  const pPP  = polls.reduce((s,p) => s + p.pPP  * p.n, 0) / W;
-  const se = diffSE(pDem, pPP, W);
-  const diff = pDem - pPP;
-  const Z = diff / se;
-  const pVal = diff > 0 ? 1 - Phi(Z) : Phi(Z);  // 양방향 대응
   const candDem = polls[0].candDem;
   const candPP = polls[0].candPP;
+
+  // raw (보정 없는) — 비교용
+  const Wraw = polls.reduce((s,p) => s + p.n, 0);
+  const pDemRaw = polls.reduce((s,p) => s + p.pDem * p.n, 0) / Wraw;
+  const pPPRaw  = polls.reduce((s,p) => s + p.pPP  * p.n, 0) / Wraw;
+
+  // 가중 (조정된)
+  const weights = polls.map(p => effectiveN(p));
+  const W = weights.reduce((s,w) => s + w, 0);
+  const pDem = polls.reduce((s,p,i) => s + p.pDem * weights[i], 0) / W;
+  const pPP  = polls.reduce((s,p,i) => s + p.pPP  * weights[i], 0) / W;
+  const pUnd = polls.reduce((s,p,i) => s + (p.pUnd ?? (1 - p.pDem - p.pPP)) * weights[i], 0) / W;
+  const pOthers = Math.max(0, 1 - pDem - pPP - pUnd);
+
+  // 통계량 — 가중 W 를 effective sample size 로 사용
+  const se = diffSE(pDem, pPP, W);
+  const diff = pDem - pPP;
+  const Z = se > 0 ? diff / se : 0;
+  const pVal = diff > 0 ? 1 - Phi(Z) : Phi(Z);
   const winner = pDem > pPP ? candDem : candPP;
-  return { polls, W, pDem, pPP, se, diff, Z, pVal, candDem, candPP, winner };
+
+  // 부동층 결집 시나리오 — 부동층이 7:3 / 5:5 / 3:7 로 분할되면 어떻게 되나
+  const scenarios = [
+    {label: "낙관 (부동층 70% → 우세후보)", pDem: pDem + (winner === candDem ? 0.7 : 0.3) * pUnd, pPP: pPP + (winner === candDem ? 0.3 : 0.7) * pUnd},
+    {label: "균등 (50:50)", pDem: pDem + 0.5 * pUnd, pPP: pPP + 0.5 * pUnd},
+    {label: "비관 (부동층 70% → 열세후보)", pDem: pDem + (winner === candDem ? 0.3 : 0.7) * pUnd, pPP: pPP + (winner === candDem ? 0.7 : 0.3) * pUnd},
+  ];
+
+  return { polls, W, Wraw, pDem, pPP, pUnd, pOthers, pDemRaw, pPPRaw,
+           se, diff, Z, pVal, candDem, candPP, winner, scenarios };
 }
 
 // ============== 도시 탭 ==============
@@ -486,22 +586,36 @@ function renderHero() {
     `<span class="dot" style="background:${decisive?'#4ade80':'#fbbf24'}"></span>${verdict}`;
 }
 
-// ============== KPI ==============
+// ============== KPI (가중치 적용 + raw 비교) ==============
 function renderKPI() {
   const s = citySummary(currentCity);
   const moDem = moe(s.pDem, s.W) * 100;
   const moPP = moe(s.pPP, s.W) * 100;
+  const W_eff = Math.round(s.W);
+
+  // raw vs adjusted 차이
+  const demShift = (s.pDem - s.pDemRaw) * 100;
+  const ppShift  = (s.pPP - s.pPPRaw) * 100;
+  const shiftClass = (sh) => sh > 0.1 ? "diff-up" : sh < -0.1 ? "diff-down" : "";
+
   const grid = document.getElementById("kpi-grid");
   grid.innerHTML = `
-    <div class="kpi dem">
+    <div class="kpi dem" title="가중평균 (House effect + 시간감쇠 적용)">
       <div class="label">${s.candDem} (민주당)</div>
       <div class="value">${fmtPct(s.pDem)}</div>
       <div class="sub">95% CI [${(s.pDem*100-moDem).toFixed(1)}%, ${(s.pDem*100+moDem).toFixed(1)}%]</div>
+      <div class="raw-comp ${shiftClass(demShift)}">raw 평균 ${(s.pDemRaw*100).toFixed(1)}% (보정 ${demShift>0?"+":""}${demShift.toFixed(2)}%p)</div>
     </div>
     <div class="kpi pp">
       <div class="label">${s.candPP} (국민의힘)</div>
       <div class="value">${fmtPct(s.pPP)}</div>
       <div class="sub">95% CI [${(s.pPP*100-moPP).toFixed(1)}%, ${(s.pPP*100+moPP).toFixed(1)}%]</div>
+      <div class="raw-comp ${shiftClass(ppShift)}">raw 평균 ${(s.pPPRaw*100).toFixed(1)}% (보정 ${ppShift>0?"+":""}${ppShift.toFixed(2)}%p)</div>
+    </div>
+    <div class="kpi und" title="부동층/미정/응답거부">
+      <div class="label">부동층 (미정·기타)</div>
+      <div class="value">${fmtPct(s.pUnd)}</div>
+      <div class="sub">결집 방향에 따라 결과 변동 가능</div>
     </div>
     <div class="kpi diff">
       <div class="label">격차 (${s.candDem} - ${s.candPP})</div>
@@ -511,9 +625,40 @@ function renderKPI() {
     <div class="kpi pval">
       <div class="label">p-value</div>
       <div class="value">${s.pVal.toExponential(2)}</div>
-      <div class="sub">Z = ${s.Z.toFixed(2)} · n_eff = ${s.W.toLocaleString()}</div>
+      <div class="sub">Z = ${s.Z.toFixed(2)} · n_eff = ${W_eff.toLocaleString()}</div>
     </div>
   `;
+}
+
+// ============== 부동층 결집 시나리오 ==============
+function renderScenarios() {
+  const s = citySummary(currentCity);
+  const cls = ["opt", "even", "pess"];
+  const el = document.getElementById("scenarios");
+  el.innerHTML = "";
+  s.scenarios.forEach((sc, i) => {
+    const total = sc.pDem + sc.pPP;
+    const demPct = (sc.pDem / total) * 100;
+    const ppPct  = 100 - demPct;
+    const winner = sc.pDem > sc.pPP ? s.candDem : s.candPP;
+    const margin = Math.abs(sc.pDem - sc.pPP) * 100;
+
+    const div = document.createElement("div");
+    div.className = `scenario ${cls[i]}`;
+    div.innerHTML = `
+      <div class="lbl">${sc.label}</div>
+      <div class="row dem"><span>${s.candDem}</span><span>${(sc.pDem*100).toFixed(1)}%</span></div>
+      <div class="row pp"><span>${s.candPP}</span><span>${(sc.pPP*100).toFixed(1)}%</span></div>
+      <div class="bar">
+        <div class="b-dem" style="width: ${demPct}%"></div>
+        <div class="b-pp" style="width: ${ppPct}%"></div>
+      </div>
+      <div style="margin-top: 8px; font-size: 12px; color: var(--muted)">
+        → <strong style="color: ${sc.pDem > sc.pPP ? 'var(--dem)' : 'var(--pp)'}">${winner}</strong> +${margin.toFixed(1)}%p 우세
+      </div>
+    `;
+    el.appendChild(div);
+  });
 }
 
 // ============== 차트 1: 시계열 추세 ==============
@@ -738,7 +883,7 @@ function renderHypothesis() {
   Plotly.newPlot("chart-hyp", traces, layout, {responsive:true, displaylogo:false});
 }
 
-// ============== 데이터 테이블 ==============
+// ============== 데이터 테이블 (가중치 컬럼 포함) ==============
 function renderTable() {
   const polls = POLLS.filter(p => p.city === currentCity)
                      .sort((a,b) => a.date.localeCompare(b.date));
@@ -754,6 +899,11 @@ function renderTable() {
     const ppLo = p.pPP*100 - moe(p.pPP,p.n)*100;
     const overlap = !(dLo > ppHi || ppLo > dHi);
     const diff = (p.pDem - p.pPP) * 100;
+    const hw = pollsterWeight(p);
+    const tw = timeWeight(p.date);
+    const pUnd = p.pUnd ?? (1 - p.pDem - p.pPP);
+    const hwClass = hw < 1.0 ? "color:#dc2626" : "";
+    const twClass = tw < 0.3 ? "color:#94a3b8" : "";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${p.date}</td>
@@ -762,6 +912,9 @@ function renderTable() {
       <td>${p.n.toLocaleString()}</td>
       <td style="color:var(--dem); font-weight:600">${(p.pDem*100).toFixed(1)}%</td>
       <td style="color:var(--pp); font-weight:600">${(p.pPP*100).toFixed(1)}%</td>
+      <td style="color:#d97706">${(pUnd*100).toFixed(1)}%</td>
+      <td style="${hwClass}">${hw.toFixed(2)}</td>
+      <td style="${twClass}">${tw.toFixed(2)}</td>
       <td style="color:${diff>0?'#16a34a':'#dc2626'}; font-weight:600">${diff>0?'+':''}${diff.toFixed(1)}%p</td>
       <td><span class="badge ${overlap?'in':'out'}">${overlap?'오차범위 내':'오차범위 밖'}</span></td>
     `;
@@ -775,6 +928,7 @@ function renderAll() {
   renderCompare();
   renderHero();
   renderKPI();
+  renderScenarios();
   renderTrend();
   renderCI();
   renderCLT();
