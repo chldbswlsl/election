@@ -1,0 +1,161 @@
+{
+  "lastUpdated": "2026-05-06T11:34:10+09:00",
+  "electionDate": "2026-06-03",
+  "source": "한국갤럽·코리아리서치·입소스·한길리서치·KSOI·바로미터연구소·여론조사공정",
+  "polls": [
+    {
+      "city": "서울시장",
+      "date": "2025-12-15",
+      "pollster": "코리아리서치",
+      "client": "MBC",
+      "n": 800,
+      "candDem": "정원오",
+      "pDem": 0.34,
+      "candPP": "오세훈",
+      "pPP": 0.36
+    },
+    {
+      "city": "서울시장",
+      "date": "2026-02-10",
+      "pollster": "코리아리서치",
+      "client": "MBC",
+      "n": 800,
+      "candDem": "정원오",
+      "pDem": 0.4,
+      "candPP": "오세훈",
+      "pPP": 0.36
+    },
+    {
+      "city": "서울시장",
+      "date": "2026-04-20",
+      "pollster": "여론조사공정",
+      "client": "펜앤마이크",
+      "n": 1000,
+      "candDem": "정원오",
+      "pDem": 0.495,
+      "candPP": "오세훈",
+      "pPP": 0.309
+    },
+    {
+      "city": "서울시장",
+      "date": "2026-04-28",
+      "pollster": "코리아리서치",
+      "client": "MBC",
+      "n": 800,
+      "candDem": "정원오",
+      "pDem": 0.48,
+      "candPP": "오세훈",
+      "pPP": 0.32
+    },
+    {
+      "city": "서울시장",
+      "date": "2026-05-02",
+      "pollster": "입소스",
+      "client": "SBS",
+      "n": 800,
+      "candDem": "정원오",
+      "pDem": 0.41,
+      "candPP": "오세훈",
+      "pPP": 0.34
+    },
+    {
+      "city": "성남시장",
+      "date": "2026-02-09",
+      "pollster": "한길리서치",
+      "client": "뉴스1",
+      "n": 503,
+      "candDem": "김병욱",
+      "pDem": 0.32,
+      "candPP": "신상진",
+      "pPP": 0.35
+    },
+    {
+      "city": "성남시장",
+      "date": "2026-04-04",
+      "pollster": "한국갤럽",
+      "client": "경인일보",
+      "n": 503,
+      "candDem": "김병욱",
+      "pDem": 0.48,
+      "candPP": "신상진",
+      "pPP": 0.33
+    },
+    {
+      "city": "성남시장",
+      "date": "2026-04-26",
+      "pollster": "한길리서치",
+      "client": "인천일보",
+      "n": 503,
+      "candDem": "김병욱",
+      "pDem": 0.436,
+      "candPP": "신상진",
+      "pPP": 0.382
+    },
+    {
+      "city": "부산시장",
+      "date": "2026-04-04",
+      "pollster": "한길리서치",
+      "client": "부산일보",
+      "n": 1004,
+      "candDem": "전재수",
+      "pDem": 0.48,
+      "candPP": "박형준",
+      "pPP": 0.349
+    },
+    {
+      "city": "부산시장",
+      "date": "2026-04-19",
+      "pollster": "KSOI",
+      "client": "KBS부산",
+      "n": 1000,
+      "candDem": "전재수",
+      "pDem": 0.4,
+      "candPP": "박형준",
+      "pPP": 0.34
+    },
+    {
+      "city": "부산시장",
+      "date": "2026-04-25",
+      "pollster": "제이투인사이트랩",
+      "client": "?",
+      "n": 1000,
+      "candDem": "전재수",
+      "pDem": 0.439,
+      "candPP": "박형준",
+      "pPP": 0.437
+    },
+    {
+      "city": "부산시장",
+      "date": "2026-04-26",
+      "pollster": "바로미터연구소",
+      "client": "?",
+      "n": 1010,
+      "candDem": "전재수",
+      "pDem": 0.439,
+      "candPP": "박형준",
+      "pPP": 0.392
+    },
+    {
+      "city": "부산시장",
+      "date": "2026-04-29",
+      "pollster": "코리아리서치",
+      "client": "MBC",
+      "n": 800,
+      "candDem": "전재수",
+      "pDem": 0.48,
+      "candPP": "박형준",
+      "pPP": 0.34
+    },
+    {
+      "city": "부산시장",
+      "date": "2026-05-02",
+      "pollster": "한길리서치",
+      "client": "부산MBC",
+      "n": 800,
+      "candDem": "전재수",
+      "pDem": 0.469,
+      "candPP": "박형준",
+      "pPP": 0.407
+    }
+  ]
+}
