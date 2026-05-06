@@ -46,43 +46,67 @@ TARGETS = [
 ]
 
 
-def fetch_html(url, timeout=60000):
-    """Playwright 로 진짜 브라우저 사용해 Cloudflare 우회. 디버그 정보 출력."""
+def fetch_html(url, timeout=90000):
+    """Playwright + stealth 로 Cloudflare 봇 검증 우회 시도."""
     from playwright.sync_api import sync_playwright
+    try:
+        from tf_playwright_stealth import stealth_sync
+        has_stealth = True
+    except ImportError:
+        has_stealth = False
+        print(f"    [fetch] (stealth 미설치 — 일반 모드)")
 
     print(f"    [fetch] launching chromium...")
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--disable-features=IsolateOrigins,site-per-process",
+                "--no-sandbox",
+            ],
+        )
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                        "AppleWebKit/537.36 (KHTML, like Gecko) "
-                       "Chrome/120.0 Safari/537.36",
+                       "Chrome/131.0.0.0 Safari/537.36",
             locale="ko-KR",
-            viewport={"width": 1280, "height": 900},
+            timezone_id="Asia/Seoul",
+            viewport={"width": 1366, "height": 800},
+            extra_http_headers={
+                "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+            },
         )
         page = context.new_page()
+        if has_stealth:
+            stealth_sync(page)
+
         print(f"    [fetch] goto {url[:80]}...")
         resp = page.goto(url, wait_until="domcontentloaded", timeout=timeout)
         status = resp.status if resp else 0
-        print(f"    [fetch] HTTP {status}, waiting for Cloudflare/render...")
+        print(f"    [fetch] HTTP {status}, Cloudflare 챌린지 대기 중...")
 
-        # Cloudflare 챌린지가 끝날 때까지 더 길게 대기 + 실 콘텐츠 셀렉터 기다림
-        page.wait_for_timeout(8000)
+        # Cloudflare 챌린지: 실제 콘텐츠 셀렉터가 나타날 때까지 최대 30초 대기
+        cf_passed = False
+        for i in range(30):
+            page.wait_for_timeout(1000)
+            title = page.title()
+            if "잠시만" not in title and "Just a moment" not in title and "Cloudflare" not in title:
+                cf_passed = True
+                print(f"    [fetch] Cloudflare 통과 ({i+1}초). title={title!r}")
+                break
+        if not cf_passed:
+            print(f"    [fetch] ⚠ Cloudflare 챌린지 미통과 (30초 timeout). title={page.title()!r}")
+
+        # 컨텐츠 안정화
         try:
-            # 나무위키 본문 컨테이너 셀렉터 후보들
-            page.wait_for_selector(
-                "div.wiki-paragraph, article, .wiki-content, table",
-                timeout=15000,
-            )
-            print(f"    [fetch] content selector found")
-        except Exception as e:
-            print(f"    [fetch] selector timeout (계속 진행): {e}")
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except Exception:
+            pass
 
-        page.wait_for_timeout(2000)  # 추가 안정화
         html = page.content()
-        title = page.title()
         browser.close()
-        print(f"    [fetch] done. title={title!r}, html_len={len(html):,}")
+        print(f"    [fetch] done. html_len={len(html):,}")
         return html
 
 

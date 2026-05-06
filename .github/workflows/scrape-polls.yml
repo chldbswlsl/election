@@ -44,7 +44,7 @@ jobs:
       - name: Install Python deps
         if: steps.blackout.outputs.blackout != 'true'
         run: |
-          pip install playwright beautifulsoup4 lxml
+          pip install playwright beautifulsoup4 lxml tf-playwright-stealth
 
       - name: Install Chromium for Playwright
         if: steps.blackout.outputs.blackout != 'true'
