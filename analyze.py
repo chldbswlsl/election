@@ -61,7 +61,9 @@ def analyse_one(poll):
     se = diff_se(pd, pp, n)
     diff = pd - pp
     z = diff / se if se > 0 else 0
-    p_value = (1 - Phi(z)) if diff > 0 else Phi(z)
+    # 단측 H1: 민주 후보(p_dem) > 국힘 후보(p_pp). Z 부호와 무관하게 1-Φ(z) 사용.
+    # 음의 z 가 나오면 p-value > 0.5 가 되어 "H1 증거 없음" 으로 올바르게 판정됨.
+    p_value = 1 - Phi(z)
     overlap = not (ld > hp or lp > hd)
     decisive = abs(diff) > Z_95 * se
     return dict(poll=poll, ld=ld, hd=hd, lp=lp, hp=hp,
@@ -127,7 +129,9 @@ def analyse_city(city, polls):
     se = diff_se(pd, pp, n_eff)
     diff = pd - pp
     z = diff / se if se > 0 else 0
-    p_value = (1 - Phi(z)) if diff > 0 else Phi(z)
+    # 단측 H1: 민주 후보(p_dem) > 국힘 후보(p_pp). Z 부호와 무관하게 1-Φ(z) 사용.
+    # 음의 z 가 나오면 p-value > 0.5 가 되어 "H1 증거 없음" 으로 올바르게 판정됨.
+    p_value = 1 - Phi(z)
     leader = cand_dem if diff > 0 else cand_pp
     print(f"\n[3] Poll-of-polls (n_eff = {n_eff:,}) — 중심극한정리")
     print("-" * 80)

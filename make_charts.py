@@ -64,8 +64,7 @@ def load_polls(path):
 # ---------- 차트 1: 시계열 추세 + CI 밴드 ----------
 def chart_trend(polls, outpath):
     # 메이저 4건만 사용 (펜앤마이크는 시점이 다른 의뢰처라 제외)
-    majors = [p for p in polls if p["client"] in ("MBC", "SBS")]
-    majors.sort(key=lambda r: r["date"])
+    majors = sorted(polls, key=lambda r: r["date"])  # 5건 모두 사용
 
     dates = [p["date"] for p in majors]
     pj = np.array([p["p_jung"] for p in majors])
@@ -170,7 +169,7 @@ def chart_ci_compare(polls, outpath):
 
 # ---------- 차트 3: 중심극한정리 - Poll-of-polls 효과 ----------
 def chart_clt_effect(polls, outpath):
-    majors = [p for p in polls if p["client"] in ("MBC", "SBS")]
+    majors = polls  # 5건 모두 사용
 
     # 가중평균 (n 비례)
     W = sum(p["n"] for p in majors)
@@ -228,7 +227,7 @@ def chart_clt_effect(polls, outpath):
 
 # ---------- 차트 4: 가설검정 p-value ----------
 def chart_hypothesis(polls, outpath):
-    majors = [p for p in polls if p["client"] in ("MBC", "SBS")]
+    majors = polls  # 5건 모두 사용
     W = sum(p["n"] for p in majors)
     pj = sum(p["p_jung"] * p["n"] for p in majors) / W
     po = sum(p["p_oh"] * p["n"] for p in majors) / W
@@ -240,7 +239,9 @@ def chart_hypothesis(polls, outpath):
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
 
-    z = np.linspace(-4, 6, 1200)
+    # x 범위는 관측 Z 가 보이도록 동적 조정 (Z 가 6 보다 크면 그만큼 늘림)
+    x_max = max(6, z_stat + 1.5)
+    z = np.linspace(-4, x_max, 1200)
     pdf = np.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
 
     # H0 분포
@@ -273,7 +274,7 @@ def chart_hypothesis(polls, outpath):
                  fontsize=13, pad=12)
     ax.set_xlabel("표준화 검정통계량 Z")
     ax.set_ylabel("확률밀도")
-    ax.set_xlim(-4, 6)
+    ax.set_xlim(-4, x_max)
     ax.set_ylim(0, 0.45)
     ax.grid(alpha=0.3)
     ax.legend(loc="upper left", fontsize=10)
