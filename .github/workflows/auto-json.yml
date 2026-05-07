@@ -1,0 +1,38 @@
+name: Auto-convert polls.csv to JSON
+
+on:
+  push:
+    paths:
+      - 'polls.csv'        # CSV 가 변경된 push 만 트리거
+  workflow_dispatch:        # 수동 실행 가능
+
+permissions:
+  contents: write           # polls.json 자동 커밋용
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    # github-actions[bot] 본인이 만든 커밋엔 다시 실행되지 않도록 (무한 루프 방지)
+    if: github.event.head_commit.author.email != '41898282+github-actions[bot]@users.noreply.github.com'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Convert CSV to JSON
+        run: python csv_to_json.py
+
+      - name: Commit JSON if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain polls.json)" ]; then
+            git add polls.json
+            git commit -m "auto: polls.csv 변경에 따라 polls.json 자동 갱신"
+            git push
+            echo "::notice::polls.json 자동 갱신 완료 — 사이트 1~2분 후 반영"
+          else
+            echo "polls.json 변경 없음 (CSV 와 이미 동일)"
+          fi
