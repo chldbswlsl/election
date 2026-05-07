@@ -512,7 +512,8 @@ function pollsterWeight(p) { return POLLSTER_WEIGHTS[p.pollster] ?? 1.0; }
 // 시간 감쇠 — 30일 반감기 (예: 60일 전 조사 → 25% 가중치)
 const HALF_LIFE_DAYS = 30;
 function timeWeight(pollDate, asOf=new Date()) {
-  const d = new Date(pollDate);
+  // KST 자정 기준으로 해석 (단순 'YYYY-MM-DD' 는 UTC 로 해석되어 9시간 오차 발생)
+  const d = new Date(pollDate + "T00:00:00+09:00");
   const days = Math.max(0, (asOf - d) / 86400000);
   return Math.pow(0.5, days / HALF_LIFE_DAYS);
 }
@@ -563,7 +564,8 @@ async function loadData() {
     LAST_UPDATED ? new Date(LAST_UPDATED).toLocaleString("ko-KR") : "-";
   // D-day
   const today = new Date();
-  const election = new Date("2026-06-03");
+  // KST 자정 기준 (선거일 시작 시점)
+  const election = new Date("2026-06-03T00:00:00+09:00");
   const days = Math.ceil((election - today) / 86400000);
   document.getElementById("d-day").textContent = days >= 0 ? `D-${days}` : `D+${-days}`;
 }

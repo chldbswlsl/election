@@ -180,7 +180,8 @@ def chart_clt_effect(polls, outpath):
     fig, axes = plt.subplots(1, 2, figsize=(13, 5.2), sharey=True)
 
     # 좌측: 단일 조사 (5/2 SBS)
-    poll = next(p for p in majors if p["date"] == "2026-05-02")
+    # 가장 최근 폴 자동 선택 (날짜 하드코딩 제거)
+    poll = max(majors, key=lambda r: r["date"])
     n_single = poll["n"]
     pj_s, po_s = poll["p_jung"], poll["p_oh"]
 

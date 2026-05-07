@@ -139,7 +139,9 @@ def analyse_city(city, polls):
     print(f"  {cand_pp} 가중평균 : {fmt_pct(pp)}   95% CI = {fmt_band(lp, hp)}")
     print(f"  차이                : {diff*100:+.2f}%p   SE = {se*100:.2f}%p")
     print(f"  Z-statistic         : {z:+.2f}")
-    print(f"  p-value             : {p_value:.6f}")
+    # 매우 작은 p-value 도 정확히 표시 (1e-6 미만이면 지수 표기)
+    p_str = f"{p_value:.6f}" if p_value >= 1e-6 else f"{p_value:.3e}"
+    print(f"  p-value             : {p_str}")
 
     if p_value < 0.01:
         confidence = "매우 높음 (99% 신뢰수준)"
