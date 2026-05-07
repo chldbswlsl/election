@@ -615,7 +615,9 @@ function citySummary(city) {
   const se = diffSE(pDem, pPP, W);
   const diff = pDem - pPP;
   const Z = se > 0 ? diff / se : 0;
-  const pVal = diff > 0 ? 1 - Phi(Z) : Phi(Z);
+  // 단측 H1: 민주 후보 > 국힘 후보. analyze.py 와 일관 — Z 부호와 무관하게 1-Φ(Z) 사용.
+  // (음수 Z 는 p-value > 0.5 → "민주 우세 증거 없음" 으로 올바르게 판정됨)
+  const pVal = 1 - Phi(Z);
   const winner = pDem > pPP ? candDem : candPP;
 
   // 부동층 결집 시나리오 — 부동층이 7:3 / 5:5 / 3:7 로 분할되면 어떻게 되나
