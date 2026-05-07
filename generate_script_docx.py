@@ -311,15 +311,90 @@ tips = [
 for t in tips:
     add_paragraph(doc, "• " + t, size=11, indent_cm=0.3, space_after=4)
 
+# === 발음 가이드 ===
+add_heading(doc, "5. 통계 기호 발음 가이드", 1)
+add_paragraph(doc, "발표 중 자주 등장하는 기호·수식의 권장 발음.",
+              size=11, color=RGBColor(0x55, 0x55, 0x55), space_after=8)
+
+add_paragraph(doc, "5-1. 핵심 기호", size=12, bold=True,
+              color=RGBColor(0x1F, 0x3A, 0x6B), space_before=6, space_after=4)
+add_table(doc,
+    ["기호", "권장 발음", "한국어 풀이"],
+    [
+        ["Z",       "제트",            "검정통계량"],
+        ["H₀",      "에이치 제로",     "귀무가설"],
+        ["H₁",      "에이치 원",       "대립가설"],
+        ["p / p̂",  "피 / 피 햇",      "표본비율 (또는 모비율)"],
+        ["q",       "큐",              "1 − p"],
+        ["p-value", "피 밸류 (또는 피 값)", "유의확률"],
+        ["Φ(z)",    "파이 오브 제트",  "표준정규 누적함수"],
+        ["σ",       "시그마",          "표준편차"],
+        ["n",       "엔",              "표본 수"],
+        ["√",       "루트",            "제곱근"],
+        ["±",       "플러스마이너스",  ""],
+        ["α",       "알파",            "유의수준"],
+        ["10⁻¹²",   "십의 마이너스 십이승",  ""],
+        ["%p",      "퍼센트 포인트",   ""],
+    ])
+
+add_paragraph(doc, "5-2. 약어 풀어서 말하기 (청중 친숙도 ↑)",
+              size=12, bold=True, color=RGBColor(0x1F, 0x3A, 0x6B),
+              space_before=10, space_after=4)
+add_table(doc,
+    ["약어", "발음 그대로", "권장 (한국어)"],
+    [
+        ["SE",  "에스이",   "표준오차"],
+        ["MoE", "엠오이",   "오차범위"],
+        ["CI",  "씨아이",   "신뢰구간"],
+        ["CLT", "씨엘티",   "중심극한정리"],
+    ])
+
+add_paragraph(doc, "5-3. 수식 발음 예시",
+              size=12, bold=True, color=RGBColor(0x1F, 0x3A, 0x6B),
+              space_before=10, space_after=4)
+examples = [
+    ("p ± 1.96 · √(p(1-p)/n)",
+     "피 플러스마이너스 일점구육 곱하기 루트, 피 곱하기 일 빼기 피, 나누기 엔"),
+    ("Z = (p_정 − p_오) / SE_Δ",
+     "제트는 피 정 빼기 피 오 나누기, 차이의 표준오차"),
+    ("p-value = 1 − Φ(Z)",
+     "피 밸류는 일 빼기 파이 오브 제트"),
+    ("p-value = 3.73 × 10⁻¹²",
+     "피 밸류 삼점칠삼 곱하기 십의 마이너스 십이승"),
+    ("95% CI [37.6%, 44.4%]",
+     "95% 신뢰구간 삼십칠점육 퍼센트에서 사십사점사 퍼센트"),
+    ("Z = +6.85",
+     "검정통계량 제트가 플러스 육점팔오"),
+]
+for orig, pron in examples:
+    add_paragraph(doc, "• " + orig, size=11, bold=True, indent_cm=0.3,
+                  space_after=2)
+    add_paragraph(doc, "  → " + pron, size=11, indent_cm=0.6,
+                  color=RGBColor(0x55, 0x55, 0x55), space_after=8)
+
+add_paragraph(doc, "Tip: 약어가 처음 등장할 때만 한국어로 풀어주고, 이후엔 짧게 약어로 말해도 OK",
+              size=10, color=RGBColor(0x6B, 0x72, 0x80),
+              space_before=8, indent_cm=0.3)
+
 # === 시간 압축안 ===
-add_heading(doc, "5. 시간 압축안 (옵션)", 1)
+add_heading(doc, "6. 시간 압축안 (옵션)", 1)
 add_paragraph(doc, "5분 발표 시 — 슬라이드 1, 2, 4, 7, 8, 11, 12 만 사용 (7장)",
               size=11, space_after=4)
 add_paragraph(doc, "3분 발표 시 — 슬라이드 1, 2, 7~10 통합 1장, 11, 12 (5장)",
               size=11, space_after=4)
 add_paragraph(doc, "10분 발표 — 12장 그대로 + 라이브 데모 1분", size=11)
 
-doc.save(OUT)
-shutil.copy(OUT, DESKTOP)
-print(f"  ✓ {OUT.name} 생성 완료 ({OUT.stat().st_size:,} bytes)")
-print(f"  ✓ 데스크톱 복사: {DESKTOP}")
+try:
+    doc.save(OUT)
+    print(f"  ✓ {OUT.name} 생성 완료 ({OUT.stat().st_size:,} bytes)")
+    target = OUT
+except PermissionError:
+    target = OUT.with_name(OUT.stem + f"_v{datetime.now().strftime('%H%M%S')}" + OUT.suffix)
+    doc.save(target)
+    print(f"  ⚠ 기존 파일 열림 — 대체 이름 저장: {target.name}")
+
+try:
+    shutil.copy(target, DESKTOP)
+    print(f"  ✓ 데스크톱 복사: {DESKTOP}")
+except PermissionError:
+    print(f"  ⚠ 데스크톱 파일이 열려있어 복사 실패. 워드에서 닫고 다시 실행하세요.")
