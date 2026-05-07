@@ -131,6 +131,24 @@ def add_code(doc, text):
     pPr.append(shd)
 
 
+def add_page_number(footer):
+    """푸터에 가운데 정렬 페이지 번호 (Word/한글 모두 자동 렌더링)"""
+    p = footer.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run()
+    fld_begin = OxmlElement("w:fldChar")
+    fld_begin.set(qn("w:fldCharType"), "begin")
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = "PAGE"
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+    run._element.append(fld_begin)
+    run._element.append(instr)
+    run._element.append(fld_end)
+    set_korean_font(run, size=9, color=RGBColor(0x55, 0x55, 0x55))
+
+
 def add_image(doc, image_path, caption, width_inches=6.2):
     """이미지 + 가운데 정렬 + 캡션"""
     p = doc.add_paragraph()
@@ -165,6 +183,9 @@ section.top_margin = Cm(2.5)
 section.bottom_margin = Cm(2.5)
 section.left_margin = Cm(2.5)
 section.right_margin = Cm(2.5)
+
+# 페이지 번호 푸터
+add_page_number(section.footer)
 
 # === 표지 ===
 for _ in range(6):
@@ -293,9 +314,9 @@ add_paragraph(doc,
 
 add_heading(doc, "2.6 중심극한정리 — 합치면 좁아진다 (PDF p10, p28)", 2)
 add_paragraph(doc,
-    "이 과제의 결정적 트릭. 한 조사 n=800 의 SE 가 ±3.5%p 라면, "
-    "4개 조사를 합쳐 n_eff=3200 이 되면 SE 가 ±1.7%p 로 정확히 절반이 된다 "
-    "(σ/√n 이 σ/√(4n) = σ/(2√n)).")
+    "이 과제의 결정적 트릭. 한 조사 n=800 의 MoE 가 ±3.5%p 인데, "
+    "5건 합쳐 n_eff=4,200 이 되면 MoE 가 ±1.5%p 로 절반 이하로 줄어든다 "
+    "(σ/√n 이 σ/√(5.25·n) = σ/(2.29·√n) 이 됨).")
 
 # === 3. 데이터 ===
 add_heading(doc, "3. 분석에 사용한 데이터", 1)
@@ -338,8 +359,8 @@ add_image(doc, CHARTS / "ci_compare.png",
 # === 4-3 CLT 효과 ===
 add_heading(doc, "4.3 중심극한정리 — Poll-of-polls 효과 (PDF p28)", 2)
 add_paragraph(doc,
-    "단일 조사 (n=800, MoE ±3.41%p) vs 합산 (n_eff=3,200, MoE ±1.70%p). "
-    "표본을 합치면 σ/√n 효과로 분포 폭이 정확히 절반이 되어 두 후보 분포의 겹침이 거의 사라진다. "
+    "단일 조사 (n=800, MoE ±3.41%p) vs 5건 합산 (n_eff=4,200, MoE ±1.50%p). "
+    "표본을 5.25배로 합치면 σ/√n 효과로 MoE 가 √5.25=2.29배 좁아져 두 후보 분포의 겹침이 거의 사라진다. "
     "이것이 PDF p28 중심극한정리의 시각적 의미다.")
 add_image(doc, CHARTS / "clt_effect.png",
           "그림 3. 단일 조사 vs Poll-of-polls 분포 비교 — 표본을 합치면 분포 폭이 좁아진다")
@@ -366,8 +387,8 @@ add_paragraph(doc,
 
 add_heading(doc, "5.2 표본수 vs 신뢰구간 폭", 2)
 add_paragraph(doc,
-    "단일 조사(n=800)의 SE가 ±3.41%p, 5건 합산(n=4,200)에서 ±0.74%p. "
-    "표본수 5.25배에 SE는 √5.25=2.29배 좁아진다는 PDF p28 의 σ/√n 공식이 그대로 확인된다. "
+    "단일 조사(n=800)의 MoE 가 ±3.41%p, 5건 합산(n_eff=4,200)에서 ±1.50%p. "
+    "표본수 5.25배에 MoE 는 √5.25=2.29배 좁아진다 — PDF p28 의 σ/√n 공식이 그대로 확인된다. "
     "데이터를 더 모으면 결론이 더 좁아진다.")
 
 add_heading(doc, "5.3 시간 추세도 정보다", 2)
