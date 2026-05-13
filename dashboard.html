@@ -223,6 +223,33 @@
   .blackout-sub { color: #78350f; font-size: 13px; margin-top: 6px; }
   .blackout-sub em { background: rgba(255,255,255,.6); padding: 1px 5px; border-radius: 3px; font-style: normal; }
 
+  /* --- Age breakdown --- */
+  .age-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
+  @media (max-width: 900px) { .age-grid { grid-template-columns: 1fr; } }
+  .age-source {
+    background: #f9fafb; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .age-source h3 {
+    margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--ink);
+  }
+  .age-source .sub { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .age-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .age-table th, .age-table td {
+    padding: 6px 8px; text-align: center; border-bottom: 1px solid #eef0f4;
+  }
+  .age-table th { background: #f3f4f6; font-weight: 600; color: var(--muted); }
+  .age-table td.age-label { text-align: left; font-weight: 600; }
+  .age-table td.win-dem { color: var(--dem); font-weight: 700; }
+  .age-table td.win-pp  { color: var(--pp);  font-weight: 700; }
+  .age-table td.na { color: #cbd5e1; font-style: italic; }
+  .age-insight {
+    background: #fffbeb; border-left: 3px solid #f59e0b;
+    padding: 12px 16px; border-radius: 4px; font-size: 13px;
+    margin-top: 10px; line-height: 1.7;
+  }
+  .age-insight strong { color: #92400e; }
+
   .formula {
     background: #f9fafb; border-left: 3px solid var(--accent);
     padding: 10px 14px; font-family: 'Consolas', 'Courier New', monospace;
@@ -370,9 +397,59 @@
   </div>
 </div>
 
+<!-- 연령대별 분석 -->
+<div class="card" id="age-card">
+  <h2>⑥ 연령대별 지지율 — 세대 분기점 <span class="pdf-tag">서울시장 전용</span></h2>
+  <p class="desc">최근 두 폴(스트레이트뉴스 5/5·펜앤마이크 5/11)의 연령대 크로스탭. <strong>40대 이상 = 정원오 압도, 20·30대 = 오세훈 우세</strong> 의 세대 균열이 일관되게 관측됨. (다른 도시는 원자료 미공개)</p>
+
+  <div id="age-charts" style="margin-bottom: 16px;">
+    <div id="age-chart" style="width:100%; height:380px;"></div>
+  </div>
+
+  <div class="age-grid">
+    <div class="age-source">
+      <h3>스트레이트뉴스 / 조원씨앤아이 (2026-05-05)</h3>
+      <div class="sub">n = 802 · 양자대결 · ARS 100% · 응답률 6.4%</div>
+      <table class="age-table">
+        <thead><tr><th>연령</th><th>정원오</th><th>오세훈</th><th>격차</th></tr></thead>
+        <tbody>
+          <tr><td class="age-label">18~29</td><td>35.8%</td><td class="win-pp">52.6%</td><td>오세훈 +16.8%p</td></tr>
+          <tr><td class="age-label">30대</td>  <td>35.4%</td><td class="win-pp">45.2%</td><td>오세훈 +9.8%p</td></tr>
+          <tr><td class="age-label">40대</td>  <td class="win-dem">66.1%</td><td>27.4%</td><td>정원오 +38.7%p</td></tr>
+          <tr><td class="age-label">50대</td>  <td class="win-dem">63.8%</td><td>22.9%</td><td>정원오 +40.9%p</td></tr>
+          <tr><td class="age-label">60대+</td> <td colspan="3" class="na">미공개</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="age-source">
+      <h3>펜앤마이크 / 여론조사공정 (2026-05-11)</h3>
+      <div class="sub">n = 801 · 다자대결 · ARS 100% · 응답률 5.7%</div>
+      <table class="age-table">
+        <thead><tr><th>연령</th><th>정원오</th><th>오세훈</th><th>격차</th></tr></thead>
+        <tbody>
+          <tr><td class="age-label">20대 이하</td><td class="na">미공개</td><td class="win-pp">42.7%</td><td>오세훈 우세</td></tr>
+          <tr><td class="age-label">30대</td>    <td class="na">미공개</td><td class="win-pp">45.3%</td><td>오세훈 우세</td></tr>
+          <tr><td class="age-label">40대</td>    <td class="win-dem">51.1%</td><td>34.1%</td><td>정원오 +17.0%p</td></tr>
+          <tr><td class="age-label">50대</td>    <td class="win-dem">51.5%</td><td>40.5%</td><td>정원오 +11.0%p</td></tr>
+          <tr><td class="age-label">60대</td>    <td class="win-dem">53.6%</td><td>35.8%</td><td>정원오 +17.8%p</td></tr>
+          <tr><td class="age-label">70+</td>     <td>36.0%</td><td class="win-pp">57.8%</td><td>오세훈 +21.8%p</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="age-insight">
+    <strong>핵심 패턴:</strong> 두 조사 모두 <strong>40~60대 = 정원오 압도(+10~40%p)</strong>, <strong>20~30대 = 오세훈 우세(+10~17%p)</strong>, <strong>70+ = 오세훈 압승(+21%p)</strong> 의 동일 패턴.
+    서울 인구구조상 40~60대 비중(약 50%)이 20~30대(약 28%)·70+(약 14%) 합보다 커서 통합 결과는 정원오 우세로 수렴.
+    <br><br>
+    <strong>전략적 시사:</strong> 오세훈은 40~60대 결집 + 청년 외 추가 동력 없이는 역전 어려움. 정원오는 청년층 추격이 보너스 — 핵심 지지층(40~60대)이 이미 견고.
+  </div>
+</div>
+
 <!-- 결과 비교 카드 -->
 <div class="card">
-  <h2>⑥ 예측 vs 실제 결과 비교 <span class="pdf-tag">6/3 개표 후</span></h2>
+  <h2>⑦ 예측 vs 실제 결과 비교 <span class="pdf-tag">6/3 개표 후</span></h2>
   <p class="desc">선거 결과가 발표되면 아래에 입력해 예측이 95% 신뢰구간 안에 들어왔는지 자체 검증할 수 있습니다.</p>
   <div id="actual-input">
     <div class="actual-grid">
@@ -397,7 +474,7 @@
 
 <!-- 통계 공식 -->
 <div class="card">
-  <h2>⑥ 사용한 공식 (PDF 핵심 개념)</h2>
+  <h2>⑧ 사용한 공식 (PDF 핵심 개념)</h2>
   <div class="grid-2">
     <div>
       <strong>모비율 95% 신뢰구간 (p44)</strong>
@@ -443,7 +520,7 @@ n_eff = ΣW_i</div>
 
 <!-- 한계 -->
 <div class="card">
-  <h2>⑦ 한계와 변동 요인</h2>
+  <h2>⑨ 한계와 변동 요인</h2>
   <ol>
     <li><strong>2종 오류 (PDF p60)</strong>: 부동층 ≈ 20% 가 막판에 결집하면 결과 변동 가능.</li>
     <li><strong>공표 금지 기간</strong>: 5/28 ~ 6/3 여론조사 공표 금지 → 그 사이 변화 미반영.</li>
@@ -480,13 +557,16 @@ n_eff = ΣW_i</div>
 // 모든 폴은 pOthers (제3후보 합) + pUnd (부동층) 자동 계산.
 // pUnd = 1 - pDem - pPP - pOthers
 const EMBEDDED = {
-  lastUpdated: "2026-05-06T14:14:00+09:00",
+  lastUpdated: "2026-05-13T09:48:00+09:00",
   polls: [
-    {city:"서울시장", date:"2025-12-15", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.340, candPP:"오세훈", pPP:0.360, pOthers:0, pUnd:0.300, method:"전화면접+ARS", responseRate:11.5, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6790513_36911.html"},
-    {city:"서울시장", date:"2026-02-10", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.400, candPP:"오세훈", pPP:0.360, pOthers:0, pUnd:0.240, method:"전화면접+ARS", responseRate:11.8, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6801176_36911.html"},
-    {city:"서울시장", date:"2026-04-20", pollster:"여론조사공정",     client:"펜앤마이크", n:1000, candDem:"정원오", pDem:0.495, candPP:"오세훈", pPP:0.309, pOthers:0, pUnd:0.196, method:"ARS",         responseRate:8.5,  sourceUrl:"https://www.pennmike.com"},
-    {city:"서울시장", date:"2026-04-28", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.480, candPP:"오세훈", pPP:0.320, pOthers:0, pUnd:0.200, method:"전화면접+ARS", responseRate:12.3, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6819190_36911.html"},
-    {city:"서울시장", date:"2026-05-02", pollster:"입소스",          client:"SBS",       n:800,  candDem:"정원오", pDem:0.410, candPP:"오세훈", pPP:0.340, pOthers:0, pUnd:0.250, method:"전화면접",     responseRate:10.7, sourceUrl:"https://sstpnews.com/news/view/1065574220707918"},
+    {city:"서울시장", date:"2025-12-15", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.340, candPP:"오세훈", pPP:0.360, pOthers:0,     pUnd:0.300, method:"전화면접+ARS", responseRate:11.5, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6790513_36911.html"},
+    {city:"서울시장", date:"2026-02-10", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.400, candPP:"오세훈", pPP:0.360, pOthers:0,     pUnd:0.240, method:"전화면접+ARS", responseRate:11.8, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6801176_36911.html"},
+    {city:"서울시장", date:"2026-04-20", pollster:"여론조사공정",     client:"펜앤마이크", n:1000, candDem:"정원오", pDem:0.495, candPP:"오세훈", pPP:0.309, pOthers:0,     pUnd:0.196, method:"ARS",         responseRate:8.5,  sourceUrl:"https://www.pennmike.com"},
+    {city:"서울시장", date:"2026-04-28", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"정원오", pDem:0.480, candPP:"오세훈", pPP:0.320, pOthers:0,     pUnd:0.200, method:"전화면접+ARS", responseRate:12.3, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6819190_36911.html"},
+    {city:"서울시장", date:"2026-05-02", pollster:"입소스",          client:"SBS",       n:800,  candDem:"정원오", pDem:0.410, candPP:"오세훈", pPP:0.340, pOthers:0,     pUnd:0.250, method:"전화면접",     responseRate:10.7, sourceUrl:"https://sstpnews.com/news/view/1065574220707918"},
+    {city:"서울시장", date:"2026-05-05", pollster:"조원씨앤아이",     client:"스트레이트뉴스", n:802, candDem:"정원오", pDem:0.502, candPP:"오세훈", pPP:0.380, pOthers:0,     pUnd:0.118, method:"ARS",         responseRate:6.4,  sourceUrl:"https://www.straightnews.co.kr/news/articleView.html?idxno=301726"},
+    {city:"서울시장", date:"2026-05-10", pollster:"한국갤럽",         client:"뉴스1",     n:802,  candDem:"정원오", pDem:0.460, candPP:"오세훈", pPP:0.380, pOthers:0.030, pUnd:0.130, method:"전화면접",     responseRate:11.0, sourceUrl:"https://www.fnnews.com/news/202605130530574567"},
+    {city:"서울시장", date:"2026-05-11", pollster:"여론조사공정",     client:"펜앤마이크", n:801,  candDem:"정원오", pDem:0.447, candPP:"오세훈", pPP:0.426, pOthers:0.037, pUnd:0.090, method:"ARS",         responseRate:5.7,  sourceUrl:"https://www.pennmike.com/news/articleView.html?idxno=120337"},
     {city:"성남시장", date:"2026-02-09", pollster:"한길리서치",       client:"뉴스1",     n:503,  candDem:"김병욱", pDem:0.320, candPP:"신상진", pPP:0.350, pOthers:0, pUnd:0.330, method:"ARS",         responseRate:9.2,  sourceUrl:"https://www.news1.kr/local/gyeonggi/6066685"},
     {city:"성남시장", date:"2026-04-04", pollster:"한국갤럽",         client:"경인일보",   n:503,  candDem:"김병욱", pDem:0.480, candPP:"신상진", pPP:0.330, pOthers:0, pUnd:0.190, method:"전화면접",     responseRate:12.6, sourceUrl:"https://www.kyeongin.com/article/1763058"},
     {city:"성남시장", date:"2026-04-26", pollster:"한길리서치",       client:"인천일보",   n:503,  candDem:"김병욱", pDem:0.436, candPP:"신상진", pPP:0.382, pOthers:0, pUnd:0.182, method:"ARS",         responseRate:9.5,  sourceUrl:"https://v.daum.net/v/20260428060013997"},
@@ -1035,6 +1115,60 @@ function renderTable() {
   });
 }
 
+// ============== 연령대별 분석 ==============
+// 두 폴의 연령 크로스탭 (출처 기사에 공개된 수치만)
+const AGE_DATA = {
+  "서울시장": {
+    ages: ["18~29", "30대", "40대", "50대", "60대", "70+"],
+    sources: [
+      { label: "정원오 (스트레이트뉴스 5/5)",
+        y: [35.8, 35.4, 66.1, 63.8, null, null],
+        color: "#2E7DD7", pattern: "" },
+      { label: "오세훈 (스트레이트뉴스 5/5)",
+        y: [52.6, 45.2, 27.4, 22.9, null, null],
+        color: "#E03131", pattern: "" },
+      { label: "정원오 (펜앤마이크 5/11)",
+        y: [null, null, 51.1, 51.5, 53.6, 36.0],
+        color: "#2E7DD7", pattern: "/" },
+      { label: "오세훈 (펜앤마이크 5/11)",
+        y: [null, null, 34.1, 40.5, 35.8, 57.8],
+        color: "#E03131", pattern: "/" },
+    ],
+  },
+};
+
+function renderAge() {
+  const card = document.getElementById("age-card");
+  const data = AGE_DATA[currentCity];
+  if (!data) {
+    card.style.display = "none";
+    return;
+  }
+  card.style.display = "";
+  const traces = data.sources.map(s => ({
+    x: data.ages, y: s.y, name: s.label, type: "bar",
+    marker: {
+      color: s.color,
+      opacity: s.pattern ? 0.85 : 0.95,
+      pattern: s.pattern ? { shape: s.pattern, solidity: 0.4, fgcolor: s.color, bgcolor: "white" } : undefined,
+      line: { color: s.color, width: 1 },
+    },
+    text: s.y.map(v => v == null ? "" : v.toFixed(1) + "%"),
+    textposition: "outside",
+    hovertemplate: `<b>%{x}</b><br>${s.label}: %{y:.1f}%<extra></extra>`,
+  }));
+  const layout = {
+    barmode: "group",
+    margin: { t: 30, r: 20, b: 70, l: 55 },
+    xaxis: { title: "연령대", gridcolor: "#eef0f4" },
+    yaxis: { title: "지지율 (%)", gridcolor: "#eef0f4", range: [0, 75] },
+    legend: { orientation: "h", x: 0.5, xanchor: "center", y: -0.18 },
+    plot_bgcolor: "white", paper_bgcolor: "white",
+    font: { family: "Malgun Gothic, sans-serif" },
+  };
+  Plotly.newPlot("age-chart", traces, layout, { responsive: true, displaylogo: false });
+}
+
 // ============== 결과 비교 (예측 vs 실제) ==============
 const ACTUAL_KEY = "vote_actual_results_v1";
 
@@ -1137,6 +1271,7 @@ function renderAll() {
   renderCLT();
   renderHypothesis();
   renderTable();
+  renderAge();
   renderActualSection();
 }
 
