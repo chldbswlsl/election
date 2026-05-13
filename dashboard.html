@@ -946,6 +946,10 @@ function renderCI() {
                      .sort((a,b) => b.date.localeCompare(a.date));
   const candDem = polls[0].candDem, candPP = polls[0].candPP;
   const labels = polls.map(p => `${p.date}<br>(${p.client})`);
+
+  // 폴 수가 늘면 컨테이너 높이를 비례 확장 — 라벨 겹침 방지 (폴당 약 40px + 여백)
+  const ciHeight = Math.max(460, polls.length * 40 + 120);
+  document.getElementById("chart-ci").style.height = ciHeight + "px";
   const yPos  = polls.map((_,i) => i);
   const yDemP = yPos.map(y => y + 0.18);
   const yPPP  = yPos.map(y => y - 0.18);
@@ -984,7 +988,8 @@ function renderCI() {
   const layout = {
     margin:{t:50, r:50, b:50, l:120},
     xaxis:{title:"지지율 (%)", range:[xMinRange, xMaxRange], gridcolor:"#eef0f4"},
-    yaxis:{tickvals:yPos, ticktext:labels, autorange:"reversed", gridcolor:"#eef0f4"},
+    yaxis:{tickvals:yPos, ticktext:labels, autorange:"reversed", gridcolor:"#eef0f4",
+           tickfont:{size:11}, automargin:true},
     legend:{orientation:"h", x:0.5, xanchor:"center", y:1.08},
     plot_bgcolor:"white", paper_bgcolor:"white",
     annotations: annotations,
