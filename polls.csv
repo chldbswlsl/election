@@ -1,7 +1,15 @@
 city,date,pollster,client,n,cand_dem,p_dem,cand_pp,p_pp,p_others,method,response_rate,source_url,note
+서울시장,2025-12-13,리서치뷰,KPI뉴스,1000,정원오,0.452,오세훈,0.381,0.000,ARS,5.4,https://www.industrynews.co.kr/news/articleView.html?idxno=75709,양자대결 정원오 오차밖
 서울시장,2025-12-15,코리아리서치,MBC,800,정원오,0.340,오세훈,0.360,0.000,전화면접+ARS,11.5,https://imnews.imbc.com/news/2026/politics/article/6790513_36911.html,오세훈 박빙 우위
+서울시장,2025-12-22,여론조사공정,펜앤마이크,801,정원오,0.258,오세훈,0.294,0.155,ARS,5.2,https://www.munhwa.com/article/11556464,다자대결 나경원 15.5% 포함
+서울시장,2025-12-27,리서치앤리서치,동아일보,802,정원오,0.304,오세훈,0.309,0.000,전화면접,8.7,https://www.donga.com,양자대결 박빙
+서울시장,2025-12-29,에이스리서치,뉴시스,804,정원오,0.409,오세훈,0.404,0.000,ARS,5.2,https://www.ajunews.com/view/20260101163550180,양자대결 초접전 0.5%p
+서울시장,2026-01-25,조원씨앤아이,스트레이트뉴스,804,정원오,0.505,오세훈,0.403,0.000,ARS,5.5,https://www.munhwa.com/article/11564098,양자대결 격차 확대
+서울시장,2026-02-08,조원씨앤아이,스트레이트뉴스,806,정원오,0.475,오세훈,0.333,0.000,ARS,5.7,https://www.munhwa.com/article/11567327,양자대결 격차 14.2%p
 서울시장,2026-02-10,코리아리서치,MBC,800,정원오,0.400,오세훈,0.360,0.000,전화면접+ARS,11.8,https://imnews.imbc.com/news/2026/politics/article/6801176_36911.html,정원오 박빙 우위
 서울시장,2026-04-20,여론조사공정,펜앤마이크,1000,정원오,0.495,오세훈,0.309,0.000,ARS,8.5,https://www.pennmike.com,보수성향 의뢰처
+서울시장,2026-04-21,조원씨앤아이,스트레이트뉴스,802,정원오,0.497,오세훈,0.359,0.000,ARS,6.3,https://www.hankookilbo.com/news/article/amp/A2026042414360004222,후보확정 후 첫조사 +13.8%p
+서울시장,2026-04-23,KSOI,CBS,1001,정원오,0.456,오세훈,0.354,0.000,무선전화,5.1,https://www.hankookilbo.com/news/article/amp/A2026042414360004222,양자대결 +10.2%p
 서울시장,2026-04-28,코리아리서치,MBC,800,정원오,0.480,오세훈,0.320,0.000,전화면접+ARS,12.3,https://imnews.imbc.com/news/2026/politics/article/6819190_36911.html,정원오 오차범위 밖
 서울시장,2026-05-02,입소스,SBS,800,정원오,0.410,오세훈,0.340,0.000,전화면접,10.7,https://sstpnews.com/news/view/1065574220707918,SBS 부동층 21%
 서울시장,2026-05-05,조원씨앤아이,스트레이트뉴스,802,정원오,0.502,오세훈,0.380,0.000,ARS,6.4,https://www.straightnews.co.kr/news/articleView.html?idxno=301726,양자대결 12.2%p 격차
