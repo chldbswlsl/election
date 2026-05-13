@@ -224,6 +224,36 @@
   .blackout-sub em { background: rgba(255,255,255,.6); padding: 1px 5px; border-radius: 3px; font-style: normal; }
 
   /* --- Age breakdown --- */
+  .age-summary-strip {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 700px) { .age-summary-strip { grid-template-columns: repeat(3, 1fr); } }
+  .age-band {
+    padding: 14px 10px; border-radius: 10px; text-align: center;
+    color: white; font-weight: 600;
+  }
+  .age-band .age-name { font-size: 13px; opacity: 0.92; margin-bottom: 4px; }
+  .age-band .age-winner { font-size: 18px; font-weight: 800; line-height: 1.1; }
+  .age-band .age-gap { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+  .age-band.dem-strong   { background: linear-gradient(135deg, #1e4f8a, #2E7DD7); }
+  .age-band.dem-mild     { background: linear-gradient(135deg, #4a90d9, #7eaee2); }
+  .age-band.pp-mild      { background: linear-gradient(135deg, #ea6868, #ef8b8b); }
+  .age-band.pp-strong    { background: linear-gradient(135deg, #b91c1c, #E03131); }
+
+  .age-charts-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+  }
+  @media (max-width: 900px) { .age-charts-grid { grid-template-columns: 1fr; } }
+  .age-chart-box {
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    background: white;
+  }
+  .age-chart-title {
+    font-size: 13px; font-weight: 700; color: var(--ink);
+    margin-bottom: 6px; text-align: center;
+  }
+
   .age-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
   @media (max-width: 900px) { .age-grid { grid-template-columns: 1fr; } }
   .age-source {
@@ -400,10 +430,21 @@
 <!-- 연령대별 분석 -->
 <div class="card" id="age-card">
   <h2>⑥ 연령대별 지지율 — 세대 분기점 <span class="pdf-tag">서울시장 전용</span></h2>
-  <p class="desc">최근 두 폴(스트레이트뉴스 5/5·펜앤마이크 5/11)의 연령대 크로스탭. <strong>40대 이상 = 정원오 압도, 20·30대 = 오세훈 우세</strong> 의 세대 균열이 일관되게 관측됨. (다른 도시는 원자료 미공개)</p>
+  <p class="desc">최근 두 폴(스트레이트뉴스 5/5·펜앤마이크 5/11)의 연령대 크로스탭. <strong>40대 이상 = 정원오 압도, 20·30대·70+ = 오세훈 우세</strong> 의 세대 균열이 일관되게 관측됨. (다른 도시는 원자료 미공개)</p>
 
-  <div id="age-charts" style="margin-bottom: 16px;">
-    <div id="age-chart" style="width:100%; height:380px;"></div>
+  <!-- 한 줄 분기점 띠 -->
+  <div class="age-summary-strip" id="age-strip"></div>
+
+  <!-- 차트 두 개 (격차 + 절대값) -->
+  <div class="age-charts-grid">
+    <div class="age-chart-box">
+      <div class="age-chart-title">① 연령대별 격차 (정원오 − 오세훈)</div>
+      <div id="age-chart-gap" style="width:100%; height:340px;"></div>
+    </div>
+    <div class="age-chart-box">
+      <div class="age-chart-title">② 연령대별 절대 지지율</div>
+      <div id="age-chart" style="width:100%; height:340px;"></div>
+    </div>
   </div>
 
   <div class="age-grid">
@@ -1137,6 +1178,36 @@ const AGE_DATA = {
   },
 };
 
+// 연령대별 평균 격차 (두 폴 모두 값 있는 경우만) — 분기점 띠용
+function ageGapSummary(data) {
+  const out = [];
+  for (let i = 0; i < data.ages.length; i++) {
+    const dems = data.sources.filter(s => s.label.startsWith("정원오")).map(s => s.y[i]);
+    const pps  = data.sources.filter(s => s.label.startsWith("오세훈")).map(s => s.y[i]);
+    const dem = dems.filter(v => v != null);
+    const pp  = pps .filter(v => v != null);
+    if (dem.length && pp.length) {
+      const avgDem = dem.reduce((a,b) => a+b, 0) / dem.length;
+      const avgPP  = pp .reduce((a,b) => a+b, 0) / pp .length;
+      out.push({ age: data.ages[i], dem: avgDem, pp: avgPP, gap: avgDem - avgPP });
+    } else if (pp.length) {
+      // 정원오 값 없고 오세훈 우세만 표기된 경우 → 100 − 오세훈 − 부동층 가정 곤란, 격차 미상
+      out.push({ age: data.ages[i], dem: null, pp: pp[0], gap: null, ppOnly: true });
+    } else {
+      out.push({ age: data.ages[i], dem: null, pp: null, gap: null });
+    }
+  }
+  return out;
+}
+
+function bandClass(gap) {
+  if (gap == null) return "pp-mild";  // 데이터로 오세훈 우세만 확인된 경우
+  if (gap >= 25)  return "dem-strong";
+  if (gap >= 0)   return "dem-mild";
+  if (gap >= -15) return "pp-mild";
+  return "pp-strong";
+}
+
 function renderAge() {
   const card = document.getElementById("age-card");
   const data = AGE_DATA[currentCity];
@@ -1145,7 +1216,72 @@ function renderAge() {
     return;
   }
   card.style.display = "";
-  const traces = data.sources.map(s => ({
+
+  // ─── 분기점 띠 ───
+  const summary = ageGapSummary(data);
+  const strip = document.getElementById("age-strip");
+  strip.innerHTML = summary.map(s => {
+    let winner, gapText;
+    if (s.gap == null) {
+      winner = s.ppOnly ? "오세훈" : "—";
+      gapText = s.ppOnly ? `오세훈 ${s.pp.toFixed(1)}%` : "데이터 없음";
+    } else {
+      winner = s.gap > 0 ? "정원오" : "오세훈";
+      gapText = `${s.gap > 0 ? "+" : ""}${s.gap.toFixed(1)}%p`;
+    }
+    return `
+      <div class="age-band ${bandClass(s.gap)}">
+        <div class="age-name">${s.age}</div>
+        <div class="age-winner">${winner}</div>
+        <div class="age-gap">${gapText}</div>
+      </div>`;
+  }).join("");
+
+  // ─── 차트 ① 격차 (정원오 − 오세훈) ───
+  const gapTraces = data.sources
+    .filter((_, i) => i % 2 === 0)  // 정원오 줄들만 선택해서 짝 만들기
+    .map((demSrc, idx) => {
+      const ppSrc = data.sources[idx * 2 + 1];
+      const gaps = demSrc.y.map((d, i) => (d != null && ppSrc.y[i] != null) ? d - ppSrc.y[i] : null);
+      const label = demSrc.label.replace("정원오 ", "");
+      return {
+        x: data.ages, y: gaps, name: label, type: "bar",
+        marker: {
+          color: gaps.map(g => g == null ? "#cbd5e1" : g > 0 ? "#2E7DD7" : "#E03131"),
+          line: { color: "rgba(0,0,0,0.15)", width: 1 },
+        },
+        text: gaps.map(g => g == null ? "" : (g > 0 ? "+" : "") + g.toFixed(1) + "%p"),
+        textposition: "outside",
+        textfont: { size: 11 },
+        hovertemplate: `<b>%{x}</b><br>${label}: %{y:.1f}%p<extra></extra>`,
+      };
+    });
+  Plotly.newPlot("age-chart-gap", gapTraces, {
+    barmode: "group",
+    margin: { t: 20, r: 15, b: 70, l: 55 },
+    xaxis: { gridcolor: "#eef0f4" },
+    yaxis: { title: "격차 (%p)", gridcolor: "#eef0f4", zeroline: true, zerolinecolor: "#94a3b8", zerolinewidth: 2 },
+    legend: { orientation: "h", x: 0.5, xanchor: "center", y: -0.18, font: { size: 11 } },
+    plot_bgcolor: "white", paper_bgcolor: "white",
+    font: { family: "Malgun Gothic, sans-serif" },
+    shapes: [
+      { type: "rect", xref: "paper", yref: "paper", x0: 0, x1: 1, y0: 0.5, y1: 1,
+        fillcolor: "rgba(46,125,215,0.04)", line: { width: 0 }, layer: "below" },
+      { type: "rect", xref: "paper", yref: "paper", x0: 0, x1: 1, y0: 0, y1: 0.5,
+        fillcolor: "rgba(224,49,49,0.04)", line: { width: 0 }, layer: "below" },
+    ],
+    annotations: [
+      { xref: "paper", yref: "paper", x: 0.99, y: 0.97, xanchor: "right",
+        text: "▲ 정원오 우세", showarrow: false,
+        font: { size: 10, color: "#2E7DD7" } },
+      { xref: "paper", yref: "paper", x: 0.99, y: 0.03, xanchor: "right",
+        text: "▼ 오세훈 우세", showarrow: false,
+        font: { size: 10, color: "#E03131" } },
+    ],
+  }, { responsive: true, displaylogo: false });
+
+  // ─── 차트 ② 절대값 grouped bar ───
+  const absTraces = data.sources.map(s => ({
     x: data.ages, y: s.y, name: s.label, type: "bar",
     marker: {
       color: s.color,
@@ -1153,20 +1289,20 @@ function renderAge() {
       pattern: s.pattern ? { shape: s.pattern, solidity: 0.4, fgcolor: s.color, bgcolor: "white" } : undefined,
       line: { color: s.color, width: 1 },
     },
-    text: s.y.map(v => v == null ? "" : v.toFixed(1) + "%"),
+    text: s.y.map(v => v == null ? "" : v.toFixed(0) + "%"),
     textposition: "outside",
+    textfont: { size: 10 },
     hovertemplate: `<b>%{x}</b><br>${s.label}: %{y:.1f}%<extra></extra>`,
   }));
-  const layout = {
+  Plotly.newPlot("age-chart", absTraces, {
     barmode: "group",
-    margin: { t: 30, r: 20, b: 70, l: 55 },
-    xaxis: { title: "연령대", gridcolor: "#eef0f4" },
+    margin: { t: 20, r: 15, b: 90, l: 55 },
+    xaxis: { gridcolor: "#eef0f4" },
     yaxis: { title: "지지율 (%)", gridcolor: "#eef0f4", range: [0, 75] },
-    legend: { orientation: "h", x: 0.5, xanchor: "center", y: -0.18 },
+    legend: { orientation: "h", x: 0.5, xanchor: "center", y: -0.22, font: { size: 10 } },
     plot_bgcolor: "white", paper_bgcolor: "white",
     font: { family: "Malgun Gothic, sans-serif" },
-  };
-  Plotly.newPlot("age-chart", traces, layout, { responsive: true, displaylogo: false });
+  }, { responsive: true, displaylogo: false });
 }
 
 // ============== 결과 비교 (예측 vs 실제) ==============
