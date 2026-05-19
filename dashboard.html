@@ -616,6 +616,10 @@ const EMBEDDED = {
     {city:"서울시장", date:"2026-05-05", pollster:"조원씨앤아이",     client:"스트레이트뉴스", n:802,  candDem:"정원오", pDem:0.502, candPP:"오세훈", pPP:0.380, pOthers:0,     pUnd:0.118, method:"ARS",         responseRate:6.4,  sourceUrl:"https://www.straightnews.co.kr/news/articleView.html?idxno=301726"},
     {city:"서울시장", date:"2026-05-10", pollster:"한국갤럽",         client:"뉴스1",        n:802,  candDem:"정원오", pDem:0.460, candPP:"오세훈", pPP:0.380, pOthers:0.030, pUnd:0.130, method:"전화면접",     responseRate:11.0, sourceUrl:"https://www.fnnews.com/news/202605130530574567"},
     {city:"서울시장", date:"2026-05-11", pollster:"여론조사공정",     client:"펜앤마이크",     n:801,  candDem:"정원오", pDem:0.447, candPP:"오세훈", pPP:0.426, pOthers:0.037, pUnd:0.090, method:"ARS",         responseRate:5.7,  sourceUrl:"https://www.pennmike.com/news/articleView.html?idxno=120337"},
+    {city:"서울시장", date:"2026-05-12", pollster:"한국리서치",       client:"KBS",          n:800,  candDem:"정원오", pDem:0.430, candPP:"오세훈", pPP:0.320, pOthers:0.020, pUnd:0.230, method:"전화면접",     responseRate:11.0, sourceUrl:"https://sisa-news.com/news/article.html?no=270082"},
+    {city:"서울시장", date:"2026-05-12", pollster:"여론조사꽃",       client:"여론조사꽃",     n:2001, candDem:"정원오", pDem:0.541, candPP:"오세훈", pPP:0.371, pOthers:0,     pUnd:0.088, method:"ARS",         responseRate:6.0,  sourceUrl:"https://www.goodmorningcc.com/news/articleView.html?idxno=446176"},
+    {city:"서울시장", date:"2026-05-12", pollster:"여론조사꽃",       client:"여론조사꽃",     n:2008, candDem:"정원오", pDem:0.544, candPP:"오세훈", pPP:0.339, pOthers:0,     pUnd:0.117, method:"전화면접",     responseRate:10.9, sourceUrl:"https://www.huffingtonpost.kr/article/257242"},
+    {city:"서울시장", date:"2026-05-13", pollster:"KSOI",            client:"CBS",          n:1002, candDem:"정원오", pDem:0.449, candPP:"오세훈", pPP:0.398, pOthers:0,     pUnd:0.153, method:"ARS",         responseRate:5.0,  sourceUrl:"https://www.polinews.co.kr/news/articleView.html?idxno=731166"},
     {city:"성남시장", date:"2026-02-09", pollster:"한길리서치",       client:"뉴스1",     n:503,  candDem:"김병욱", pDem:0.320, candPP:"신상진", pPP:0.350, pOthers:0, pUnd:0.330, method:"ARS",         responseRate:9.2,  sourceUrl:"https://www.news1.kr/local/gyeonggi/6066685"},
     {city:"성남시장", date:"2026-04-04", pollster:"한국갤럽",         client:"경인일보",   n:503,  candDem:"김병욱", pDem:0.480, candPP:"신상진", pPP:0.330, pOthers:0, pUnd:0.190, method:"전화면접",     responseRate:12.6, sourceUrl:"https://www.kyeongin.com/article/1763058"},
     {city:"성남시장", date:"2026-04-26", pollster:"한길리서치",       client:"인천일보",   n:503,  candDem:"김병욱", pDem:0.436, candPP:"신상진", pPP:0.382, pOthers:0, pUnd:0.182, method:"ARS",         responseRate:9.5,  sourceUrl:"https://v.daum.net/v/20260428060013997"},
@@ -632,6 +636,7 @@ const EMBEDDED = {
 // 기본 1.0, 의심스러운 의뢰처는 < 1.0 으로 디스카운트
 const POLLSTER_WEIGHTS = {
   "여론조사공정": 0.5,    // 펜앤마이크(보수) 의뢰. 후보 친화적 결과 나옴
+  "여론조사꽃":   0.5,    // 진보 성향. 정원오 강세 결과로 일관 (같은 날 ARS+CATI 2건 중복 보정)
   "제이투인사이트랩": 0.7, // 알려지지 않은 곳
   "바로미터연구소": 0.7,
   // default 1.0
