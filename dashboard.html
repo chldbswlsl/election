@@ -209,6 +209,21 @@
   .badge { padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
   .badge.in  { background: #fef3c7; color: #92400e; }
   .badge.out { background: #d1fae5; color: #065f46; }
+  .badge.yangja { background: #ede9fe; color: #5b21b6; }
+  .badge.daja   { background: #fce7f3; color: #9d174d; }
+
+  /* 양자/다자 분할 카드 */
+  .split-tile {
+    background: #f9fafb; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .split-tile.recommended { border-color: var(--accent); border-width: 2px; background: linear-gradient(180deg, #f0f7ff, white); }
+  .split-tile .split-lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
+  .split-tile .split-n { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .split-tile .split-gap { font-size: 22px; font-weight: 700; margin-top: 8px; color: var(--dem); }
+  .split-tile.daja .split-gap { color: #be185d; }
+  .split-tile .split-pct { font-size: 12px; margin-top: 6px; color: var(--ink); }
+  .split-tile .split-stat { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
   /* 공표금지 배너 */
   .blackout-banner {
@@ -244,7 +259,7 @@
   .age-charts-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
   }
-  @media (max-width: 900px) { .age-charts-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1100px) { .age-charts-grid { grid-template-columns: 1fr; } }
   .age-chart-box {
     border: 1px solid var(--border); border-radius: 10px; padding: 12px;
     background: white;
@@ -255,7 +270,10 @@
   }
 
   .age-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
-  @media (max-width: 900px) { .age-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1100px) { .age-grid { grid-template-columns: 1fr; } }
+  /* 좁은 화면에서 표가 컨테이너 폭을 넘으면 가로 스크롤 — 짤림 방지 */
+  .age-source { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .age-table { min-width: 320px; }
   .age-source {
     background: #f9fafb; border: 1px solid var(--border); border-radius: 10px;
     padding: 14px 16px;
@@ -279,6 +297,23 @@
     margin-top: 10px; line-height: 1.7;
   }
   .age-insight strong { color: #92400e; }
+
+  /* 기간 토글 버튼 (② 신뢰구간 비교 차트용) */
+  .period-toggle {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .period-toggle button {
+    padding: 6px 14px; font-size: 12px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    background: #f3f4f6; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 6px;
+    transition: all .15s ease;
+  }
+  .period-toggle button:hover { background: #e5e7eb; color: var(--ink); }
+  .period-toggle button.active {
+    background: var(--accent); color: white; border-color: var(--accent);
+    box-shadow: 0 2px 4px rgba(46,125,215,.25);
+  }
 
   .formula {
     background: #f9fafb; border-left: 3px solid var(--accent);
@@ -371,6 +406,14 @@
 <!-- KPI -->
 <div class="kpi-grid" id="kpi-grid"></div>
 
+<!-- 양자/다자 분할 비교 -->
+<div class="card" id="ballot-split-card" style="padding: 20px 22px;">
+  <h2 style="margin-bottom: 6px;">⚖️ 양자 / 다자 분할 — 편향 점검 <span class="pdf-tag">방법론 보정</span></h2>
+  <p class="desc">실제 선거는 다자 구도이지만 양자대결 폴이 표본수로 더 많아 통합 합산이 양자 쪽으로 끌릴 위험이 있음. 두 결과를 병렬로 표시해 단일 숫자 의존 방지.</p>
+  <div id="ballot-split" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
+  <p id="ballot-split-note" style="font-size:12px; color:var(--muted); margin-top:10px;"></p>
+</div>
+
 <!-- 부동층 결집 시나리오 -->
 <div class="card" style="padding: 20px 22px;">
   <h2 style="margin-bottom: 6px;">⚡ 부동층 결집 시나리오 <span class="pdf-tag">2종 오류 대비</span></h2>
@@ -381,15 +424,22 @@
 <!-- Chart 1: Trend -->
 <div class="card">
   <h2>① 후보 지지율 추세 <span class="pdf-tag">PDF p44 모비율 추정</span></h2>
-  <p class="desc">시계열 + 95% 신뢰구간 밴드. 점에 호버하면 정확한 수치, 박스 드래그로 확대.</p>
-  <div id="chart-trend" style="height: 440px;"></div>
+  <p class="desc">시계열 + 95% 신뢰구간 밴드. <strong>기본 2주 줌</strong> — 상단 [1주/2주/1달/전체] 버튼으로 기간 변경. 같은 날 폴 여러 건은 시간 분산으로 겹침 방지.</p>
+  <div id="chart-trend" style="height: 520px;"></div>
 </div>
 
 <!-- Chart 2: CI compare -->
 <div class="card">
   <h2>② 조사별 95% 신뢰구간 비교 <span class="pdf-tag">PDF p45 오차범위 내 접전</span></h2>
-  <p class="desc">두 에러바가 겹치면 박빙(Case B 가능), 분리되면 우세 확정(Case A).</p>
+  <p class="desc">두 에러바가 겹치면 박빙(Case B 가능), 분리되면 우세 확정(Case A). <strong>기본 최근 2주</strong> — 토글로 기간 변경.</p>
+  <div id="ci-period-toggle" class="period-toggle">
+    <button type="button" data-days="7">최근 1주</button>
+    <button type="button" data-days="14" class="active">최근 2주</button>
+    <button type="button" data-days="30">최근 1달</button>
+    <button type="button" data-days="9999">전체</button>
+  </div>
   <div id="chart-ci" style="height: 460px;"></div>
+  <p id="ci-empty-note" style="display:none; color:var(--muted); text-align:center; padding:18px 0; font-size:13px;">⚠ 선택한 기간에 폴이 없습니다. 더 긴 기간을 선택하세요.</p>
 </div>
 
 <!-- Chart 3: CLT -->
@@ -406,9 +456,18 @@
   <div id="chart-hyp" style="height: 450px;"></div>
 </div>
 
+<!-- 방송사별 지지율 종합 -->
+<div class="card" id="broadcaster-card">
+  <h2>⑤ 방송사별 지지율 종합 <span class="pdf-tag">의뢰처 그룹화</span></h2>
+  <p class="desc">KBS·MBC·SBS·CBS 4사가 의뢰한 폴을 표본수 가중평균으로 합성. 지역 계열사(KBS부산·부산MBC)는 본사와 통합. 맨 아래 ★ 표시는 NESDC(중앙선거여론조사심의위) 등록 전체 평균.</p>
+  <div id="broadcaster-grid"></div>
+  <div id="broadcaster-chart" style="height: 380px; margin-top: 22px;"></div>
+  <p id="broadcaster-empty" style="display:none; color: var(--muted); text-align:center; padding: 18px 0 4px; font-size:13px;">⚠ 이 도시는 KBS·MBC·SBS·CBS 의뢰 폴이 없습니다. 전체 평균만 표시됩니다.</p>
+</div>
+
 <!-- 데이터 테이블 -->
 <div class="card">
-  <h2>⑤ 원자료 — 사용한 여론조사</h2>
+  <h2>⑥ 원자료 — 사용한 여론조사</h2>
   <p class="desc">중앙선거여론조사심의위 등록 기준. 응답률·조사방식·출처 클릭 가능.</p>
   <div class="table-wrap">
     <table>
@@ -416,6 +475,7 @@
         <tr><th>조사일</th><th>의뢰처</th><th>조사기관</th><th>n</th>
             <th title="응답률 (%)">응답</th>
             <th title="조사방식">방식</th>
+            <th title="양자대결 / 다자대결 구분">구도</th>
             <th id="th-dem">민주당</th><th id="th-pp">국민의힘</th>
             <th>부동층</th>
             <th title="House effect 의뢰처 가중치">House w</th>
@@ -429,7 +489,7 @@
 
 <!-- 연령대별 분석 -->
 <div class="card" id="age-card">
-  <h2>⑥ 연령대별 지지율 — 세대 분기점 <span class="pdf-tag">서울시장 전용</span></h2>
+  <h2>⑦ 연령대별 지지율 — 세대 분기점 <span class="pdf-tag">서울시장 전용</span></h2>
   <p class="desc">최근 두 폴(스트레이트뉴스 5/5·펜앤마이크 5/11)의 연령대 크로스탭. <strong>40대 이상 = 정원오 압도, 20·30대·70+ = 오세훈 우세</strong> 의 세대 균열이 일관되게 관측됨. (다른 도시는 원자료 미공개)</p>
 
   <!-- 한 줄 분기점 띠 -->
@@ -490,7 +550,7 @@
 
 <!-- 결과 비교 카드 -->
 <div class="card">
-  <h2>⑦ 예측 vs 실제 결과 비교 <span class="pdf-tag">6/3 개표 후</span></h2>
+  <h2>⑧ 예측 vs 실제 결과 비교 <span class="pdf-tag">6/3 개표 후</span></h2>
   <p class="desc">선거 결과가 발표되면 아래에 입력해 예측이 95% 신뢰구간 안에 들어왔는지 자체 검증할 수 있습니다.</p>
   <div id="actual-input">
     <div class="actual-grid">
@@ -515,7 +575,7 @@
 
 <!-- 통계 공식 -->
 <div class="card">
-  <h2>⑧ 사용한 공식 (PDF 핵심 개념)</h2>
+  <h2>⑨ 사용한 공식 (PDF 핵심 개념)</h2>
   <div class="grid-2">
     <div>
       <strong>모비율 95% 신뢰구간 (p44)</strong>
@@ -561,7 +621,7 @@ n_eff = ΣW_i</div>
 
 <!-- 한계 -->
 <div class="card">
-  <h2>⑨ 한계와 변동 요인</h2>
+  <h2>⑩ 한계와 변동 요인</h2>
   <ol>
     <li><strong>2종 오류 (PDF p60)</strong>: 부동층 ≈ 20% 가 막판에 결집하면 결과 변동 가능.</li>
     <li><strong>공표 금지 기간</strong>: 5/28 ~ 6/3 여론조사 공표 금지 → 그 사이 변화 미반영.</li>
@@ -597,40 +657,58 @@ n_eff = ΣW_i</div>
 
 // 모든 폴은 pOthers (제3후보 합) + pUnd (부동층) 자동 계산.
 // pUnd = 1 - pDem - pPP - pOthers
+// EMBEDDED-START — csv_to_json.py 가 자동 갱신 (수동 편집 금지)
 const EMBEDDED = {
-  lastUpdated: "2026-05-13T10:33:00+09:00",
+  lastUpdated: "2026-05-27T14:33:20+09:00",
   polls: [
-    {city:"서울시장", date:"2025-12-13", pollster:"리서치뷰",        client:"KPI뉴스",        n:1000, candDem:"정원오", pDem:0.452, candPP:"오세훈", pPP:0.381, pOthers:0,     pUnd:0.167, method:"ARS",         responseRate:5.4,  sourceUrl:"https://www.industrynews.co.kr/news/articleView.html?idxno=75709"},
-    {city:"서울시장", date:"2025-12-15", pollster:"코리아리서치",     client:"MBC",          n:800,  candDem:"정원오", pDem:0.340, candPP:"오세훈", pPP:0.360, pOthers:0,     pUnd:0.300, method:"전화면접+ARS", responseRate:11.5, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6790513_36911.html"},
-    {city:"서울시장", date:"2025-12-22", pollster:"여론조사공정",     client:"펜앤마이크",     n:801,  candDem:"정원오", pDem:0.258, candPP:"오세훈", pPP:0.294, pOthers:0.155, pUnd:0.293, method:"ARS",         responseRate:5.2,  sourceUrl:"https://www.munhwa.com/article/11556464"},
-    {city:"서울시장", date:"2025-12-27", pollster:"리서치앤리서치",   client:"동아일보",       n:802,  candDem:"정원오", pDem:0.304, candPP:"오세훈", pPP:0.309, pOthers:0,     pUnd:0.387, method:"전화면접",     responseRate:8.7,  sourceUrl:"https://www.donga.com"},
-    {city:"서울시장", date:"2025-12-29", pollster:"에이스리서치",     client:"뉴시스",         n:804,  candDem:"정원오", pDem:0.409, candPP:"오세훈", pPP:0.404, pOthers:0,     pUnd:0.187, method:"ARS",         responseRate:5.2,  sourceUrl:"https://www.ajunews.com/view/20260101163550180"},
-    {city:"서울시장", date:"2026-01-25", pollster:"조원씨앤아이",     client:"스트레이트뉴스", n:804,  candDem:"정원오", pDem:0.505, candPP:"오세훈", pPP:0.403, pOthers:0,     pUnd:0.092, method:"ARS",         responseRate:5.5,  sourceUrl:"https://www.munhwa.com/article/11564098"},
-    {city:"서울시장", date:"2026-02-08", pollster:"조원씨앤아이",     client:"스트레이트뉴스", n:806,  candDem:"정원오", pDem:0.475, candPP:"오세훈", pPP:0.333, pOthers:0,     pUnd:0.192, method:"ARS",         responseRate:5.7,  sourceUrl:"https://www.munhwa.com/article/11567327"},
-    {city:"서울시장", date:"2026-02-10", pollster:"코리아리서치",     client:"MBC",          n:800,  candDem:"정원오", pDem:0.400, candPP:"오세훈", pPP:0.360, pOthers:0,     pUnd:0.240, method:"전화면접+ARS", responseRate:11.8, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6801176_36911.html"},
-    {city:"서울시장", date:"2026-04-20", pollster:"여론조사공정",     client:"펜앤마이크",     n:1000, candDem:"정원오", pDem:0.495, candPP:"오세훈", pPP:0.309, pOthers:0,     pUnd:0.196, method:"ARS",         responseRate:8.5,  sourceUrl:"https://www.pennmike.com"},
-    {city:"서울시장", date:"2026-04-21", pollster:"조원씨앤아이",     client:"스트레이트뉴스", n:802,  candDem:"정원오", pDem:0.497, candPP:"오세훈", pPP:0.359, pOthers:0,     pUnd:0.144, method:"ARS",         responseRate:6.3,  sourceUrl:"https://www.hankookilbo.com/news/article/amp/A2026042414360004222"},
-    {city:"서울시장", date:"2026-04-23", pollster:"KSOI",            client:"CBS",          n:1001, candDem:"정원오", pDem:0.456, candPP:"오세훈", pPP:0.354, pOthers:0,     pUnd:0.190, method:"무선전화",     responseRate:5.1,  sourceUrl:"https://www.hankookilbo.com/news/article/amp/A2026042414360004222"},
-    {city:"서울시장", date:"2026-04-28", pollster:"코리아리서치",     client:"MBC",          n:800,  candDem:"정원오", pDem:0.480, candPP:"오세훈", pPP:0.320, pOthers:0,     pUnd:0.200, method:"전화면접+ARS", responseRate:12.3, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6819190_36911.html"},
-    {city:"서울시장", date:"2026-05-02", pollster:"입소스",          client:"SBS",          n:800,  candDem:"정원오", pDem:0.410, candPP:"오세훈", pPP:0.340, pOthers:0,     pUnd:0.250, method:"전화면접",     responseRate:10.7, sourceUrl:"https://sstpnews.com/news/view/1065574220707918"},
-    {city:"서울시장", date:"2026-05-05", pollster:"조원씨앤아이",     client:"스트레이트뉴스", n:802,  candDem:"정원오", pDem:0.502, candPP:"오세훈", pPP:0.380, pOthers:0,     pUnd:0.118, method:"ARS",         responseRate:6.4,  sourceUrl:"https://www.straightnews.co.kr/news/articleView.html?idxno=301726"},
-    {city:"서울시장", date:"2026-05-10", pollster:"한국갤럽",         client:"뉴스1",        n:802,  candDem:"정원오", pDem:0.460, candPP:"오세훈", pPP:0.380, pOthers:0.030, pUnd:0.130, method:"전화면접",     responseRate:11.0, sourceUrl:"https://www.fnnews.com/news/202605130530574567"},
-    {city:"서울시장", date:"2026-05-11", pollster:"여론조사공정",     client:"펜앤마이크",     n:801,  candDem:"정원오", pDem:0.447, candPP:"오세훈", pPP:0.426, pOthers:0.037, pUnd:0.090, method:"ARS",         responseRate:5.7,  sourceUrl:"https://www.pennmike.com/news/articleView.html?idxno=120337"},
-    {city:"서울시장", date:"2026-05-12", pollster:"한국리서치",       client:"KBS",          n:800,  candDem:"정원오", pDem:0.430, candPP:"오세훈", pPP:0.320, pOthers:0.020, pUnd:0.230, method:"전화면접",     responseRate:11.0, sourceUrl:"https://sisa-news.com/news/article.html?no=270082"},
-    {city:"서울시장", date:"2026-05-12", pollster:"여론조사꽃",       client:"여론조사꽃",     n:2001, candDem:"정원오", pDem:0.541, candPP:"오세훈", pPP:0.371, pOthers:0,     pUnd:0.088, method:"ARS",         responseRate:6.0,  sourceUrl:"https://www.goodmorningcc.com/news/articleView.html?idxno=446176"},
-    {city:"서울시장", date:"2026-05-12", pollster:"여론조사꽃",       client:"여론조사꽃",     n:2008, candDem:"정원오", pDem:0.544, candPP:"오세훈", pPP:0.339, pOthers:0,     pUnd:0.117, method:"전화면접",     responseRate:10.9, sourceUrl:"https://www.huffingtonpost.kr/article/257242"},
-    {city:"서울시장", date:"2026-05-13", pollster:"KSOI",            client:"CBS",          n:1002, candDem:"정원오", pDem:0.449, candPP:"오세훈", pPP:0.398, pOthers:0,     pUnd:0.153, method:"ARS",         responseRate:5.0,  sourceUrl:"https://www.polinews.co.kr/news/articleView.html?idxno=731166"},
-    {city:"성남시장", date:"2026-02-09", pollster:"한길리서치",       client:"뉴스1",     n:503,  candDem:"김병욱", pDem:0.320, candPP:"신상진", pPP:0.350, pOthers:0, pUnd:0.330, method:"ARS",         responseRate:9.2,  sourceUrl:"https://www.news1.kr/local/gyeonggi/6066685"},
-    {city:"성남시장", date:"2026-04-04", pollster:"한국갤럽",         client:"경인일보",   n:503,  candDem:"김병욱", pDem:0.480, candPP:"신상진", pPP:0.330, pOthers:0, pUnd:0.190, method:"전화면접",     responseRate:12.6, sourceUrl:"https://www.kyeongin.com/article/1763058"},
-    {city:"성남시장", date:"2026-04-26", pollster:"한길리서치",       client:"인천일보",   n:503,  candDem:"김병욱", pDem:0.436, candPP:"신상진", pPP:0.382, pOthers:0, pUnd:0.182, method:"ARS",         responseRate:9.5,  sourceUrl:"https://v.daum.net/v/20260428060013997"},
-    {city:"부산시장", date:"2026-04-04", pollster:"한길리서치",       client:"부산일보",   n:1004, candDem:"전재수", pDem:0.480, candPP:"박형준", pPP:0.349, pOthers:0, pUnd:0.171, method:"ARS",         responseRate:9.8,  sourceUrl:"https://www.busan.com"},
-    {city:"부산시장", date:"2026-04-19", pollster:"KSOI",            client:"KBS부산",   n:1000, candDem:"전재수", pDem:0.400, candPP:"박형준", pPP:0.340, pOthers:0, pUnd:0.260, method:"전화면접+ARS", responseRate:11.2, sourceUrl:"https://news.kbs.co.kr/news/pc/view/view.do"},
-    {city:"부산시장", date:"2026-04-25", pollster:"제이투인사이트랩", client:"-",         n:1000, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.437, pOthers:0, pUnd:0.124, method:"ARS",         responseRate:8.8,  sourceUrl:"https://www.viva100.com/article/20260427500342"},
-    {city:"부산시장", date:"2026-04-26", pollster:"바로미터연구소",   client:"-",         n:1010, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.392, pOthers:0, pUnd:0.169, method:"ARS",         responseRate:9.0,  sourceUrl:"https://www.koreaeaglenews.com/news/articleView.html?idxno=99369"},
-    {city:"부산시장", date:"2026-04-29", pollster:"코리아리서치",     client:"MBC",       n:800,  candDem:"전재수", pDem:0.480, candPP:"박형준", pPP:0.340, pOthers:0, pUnd:0.180, method:"전화면접+ARS", responseRate:11.5, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6819191_36911.html"},
-    {city:"부산시장", date:"2026-05-02", pollster:"한길리서치",       client:"부산MBC",   n:800,  candDem:"전재수", pDem:0.469, candPP:"박형준", pPP:0.407, pOthers:0, pUnd:0.124, method:"ARS",         responseRate:10.5, sourceUrl:"https://www.dailian.co.kr/news/view/1640728"},
+    {city:"서울시장", date:"2025-12-13", pollster:"리서치뷰", client:"KPI뉴스", n:1000, candDem:"정원오", pDem:0.452, candPP:"오세훈", pPP:0.381, pOthers:0, pUnd:0.167, method:"ARS", responseRate:5.4, sourceUrl:"https://www.industrynews.co.kr/news/articleView.html?idxno=75709"},
+    {city:"서울시장", date:"2025-12-30", pollster:"코리아리서치", client:"MBC", n:800, candDem:"정원오", pDem:0.34, candPP:"오세훈", pPP:0.36, pOthers:0, pUnd:0.3, method:"전화면접+ARS", responseRate:11.5, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6790513_36911.html"},
+    {city:"서울시장", date:"2025-12-22", pollster:"여론조사공정", client:"펜앤마이크", n:801, candDem:"정원오", pDem:0.258, candPP:"오세훈", pPP:0.294, pOthers:0, pUnd:0.448, method:"ARS", responseRate:5.2, sourceUrl:"https://www.munhwa.com/article/11556464"},
+    {city:"서울시장", date:"2025-12-29", pollster:"에이스리서치", client:"뉴시스", n:804, candDem:"정원오", pDem:0.409, candPP:"오세훈", pPP:0.404, pOthers:0, pUnd:0.187, method:"ARS", responseRate:5.2, sourceUrl:"https://www.ajunews.com/view/20260101163550180"},
+    {city:"서울시장", date:"2026-01-25", pollster:"조원씨앤아이", client:"스트레이트뉴스", n:804, candDem:"정원오", pDem:0.505, candPP:"오세훈", pPP:0.403, pOthers:0, pUnd:0.092, method:"ARS", responseRate:5.5, sourceUrl:"https://www.munhwa.com/article/11564098"},
+    {city:"서울시장", date:"2026-02-08", pollster:"조원씨앤아이", client:"스트레이트뉴스", n:806, candDem:"정원오", pDem:0.475, candPP:"오세훈", pPP:0.333, pOthers:0, pUnd:0.192, method:"ARS", responseRate:5.7, sourceUrl:"https://www.munhwa.com/article/11567327"},
+    {city:"서울시장", date:"2026-02-13", pollster:"코리아리서치", client:"MBC", n:801, candDem:"정원오", pDem:0.4, candPP:"오세훈", pPP:0.36, pOthers:0, pUnd:0.24, method:"전화면접+ARS", responseRate:9.3, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6801176_36911.html"},
+    {city:"서울시장", date:"2026-04-11", pollster:"한국갤럽", client:"세계일보", n:803, candDem:"정원오", pDem:0.52, candPP:"오세훈", pPP:0.37, pOthers:0, pUnd:0.11, method:"전화면접", responseRate:11.9, sourceUrl:"https://www.munhwa.com/article/11581633"},
+    {city:"서울시장", date:"2026-04-15", pollster:"여론조사꽃", client:"여론조사꽃", n:2006, candDem:"정원오", pDem:0.552, candPP:"오세훈", pPP:0.292, pOthers:0, pUnd:0.156, method:"전화면접", responseRate:10.9, sourceUrl:"https://www.mindlenews.com/news/articleView.html?idxno=19756"},
+    {city:"서울시장", date:"2026-04-21", pollster:"조원씨앤아이", client:"스트레이트뉴스", n:802, candDem:"정원오", pDem:0.497, candPP:"오세훈", pPP:0.359, pOthers:0, pUnd:0.144, method:"ARS", responseRate:6.3, sourceUrl:"https://www.hankookilbo.com/news/article/amp/A2026042414360004222"},
+    {city:"서울시장", date:"2026-04-23", pollster:"KSOI", client:"CBS", n:1001, candDem:"정원오", pDem:0.456, candPP:"오세훈", pPP:0.354, pOthers:0, pUnd:0.19, method:"무선전화", responseRate:5.1, sourceUrl:"https://www.hankookilbo.com/news/article/amp/A2026042414360004222"},
+    {city:"서울시장", date:"2026-04-28", pollster:"코리아리서치", client:"MBC", n:800, candDem:"정원오", pDem:0.48, candPP:"오세훈", pPP:0.32, pOthers:0, pUnd:0.2, method:"전화면접+ARS", responseRate:12.3, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6819190_36911.html"},
+    {city:"서울시장", date:"2026-05-02", pollster:"입소스", client:"SBS", n:800, candDem:"정원오", pDem:0.41, candPP:"오세훈", pPP:0.34, pOthers:0, pUnd:0.25, method:"전화면접", responseRate:10.7, sourceUrl:"https://sstpnews.com/news/view/1065574220707918"},
+    {city:"서울시장", date:"2026-05-02", pollster:"에브리리서치", client:"에브리뉴스", n:1000, candDem:"정원오", pDem:0.53, candPP:"오세훈", pPP:0.4, pOthers:0, pUnd:0.07, method:"ARS", responseRate:4.6, sourceUrl:"https://www.everynews.co.kr/news/articleView.html?idxno=48017"},
+    {city:"서울시장", date:"2026-05-05", pollster:"조원씨앤아이", client:"스트레이트뉴스", n:802, candDem:"정원오", pDem:0.502, candPP:"오세훈", pPP:0.38, pOthers:0, pUnd:0.118, method:"ARS", responseRate:6.4, sourceUrl:"https://www.straightnews.co.kr/news/articleView.html?idxno=301726"},
+    {city:"서울시장", date:"2026-05-10", pollster:"한국갤럽", client:"뉴스1", n:802, candDem:"정원오", pDem:0.46, candPP:"오세훈", pPP:0.38, pOthers:0.03, pUnd:0.13, method:"전화면접", responseRate:11, sourceUrl:"https://www.fnnews.com/news/202605130530574567"},
+    {city:"서울시장", date:"2026-05-11", pollster:"여론조사공정", client:"펜앤마이크", n:801, candDem:"정원오", pDem:0.447, candPP:"오세훈", pPP:0.426, pOthers:0.037, pUnd:0.09, method:"ARS", responseRate:5.7, sourceUrl:"https://www.pennmike.com/news/articleView.html?idxno=120337"},
+    {city:"서울시장", date:"2026-05-14", pollster:"한국리서치", client:"KBS", n:800, candDem:"정원오", pDem:0.43, candPP:"오세훈", pPP:0.32, pOthers:0.02, pUnd:0.23, method:"전화면접", responseRate:11, sourceUrl:"https://sisa-news.com/news/article.html?no=270082"},
+    {city:"서울시장", date:"2026-05-12", pollster:"여론조사꽃", client:"여론조사꽃", n:2001, candDem:"정원오", pDem:0.541, candPP:"오세훈", pPP:0.371, pOthers:0, pUnd:0.088, method:"ARS", responseRate:6, sourceUrl:"https://www.goodmorningcc.com/news/articleView.html?idxno=446176"},
+    {city:"서울시장", date:"2026-05-12", pollster:"여론조사꽃", client:"여론조사꽃", n:2008, candDem:"정원오", pDem:0.544, candPP:"오세훈", pPP:0.339, pOthers:0, pUnd:0.117, method:"전화면접", responseRate:10.9, sourceUrl:"https://www.huffingtonpost.kr/article/257242"},
+    {city:"서울시장", date:"2026-05-13", pollster:"KSOI", client:"CBS", n:1002, candDem:"정원오", pDem:0.449, candPP:"오세훈", pPP:0.398, pOthers:0, pUnd:0.153, method:"ARS", responseRate:5, sourceUrl:"https://www.polinews.co.kr/news/articleView.html?idxno=731166"},
+    {city:"서울시장", date:"2026-05-17", pollster:"메트릭스", client:"조선일보", n:800, candDem:"정원오", pDem:0.4, candPP:"오세훈", pPP:0.37, pOthers:0.01, pUnd:0.22, method:"전화면접", responseRate:null, sourceUrl:"https://www.sedaily.com/article/20045686"},
+    {city:"서울시장", date:"2026-05-20", pollster:"한국리서치", client:"KBS", n:800, candDem:"정원오", pDem:0.45, candPP:"오세훈", pPP:0.34, pOthers:0.03, pUnd:0.18, method:"전화면접", responseRate:null, sourceUrl:"https://www.dt.co.kr/article/12064410"},
+    {city:"서울시장", date:"2026-05-20", pollster:"에이스리서치", client:"뉴시스", n:1002, candDem:"정원오", pDem:0.417, candPP:"오세훈", pPP:0.416, pOthers:0.076, pUnd:0.091, method:"ARS", responseRate:5.5, sourceUrl:"https://www.newsis.com/view/NISX20260521_0003639413"},
+    {city:"서울시장", date:"2026-05-20", pollster:"조원씨앤아이", client:"시사저널", n:806, candDem:"정원오", pDem:0.43, candPP:"오세훈", pPP:0.426, pOthers:0, pUnd:0.144, method:"ARS", responseRate:null, sourceUrl:"https://www.sisajournal.com/news/articleView.html?idxno=373852"},
+    {city:"서울시장", date:"2026-05-21", pollster:"리서치웰", client:"뉴데일리", n:977, candDem:"정원오", pDem:0.42, candPP:"오세훈", pPP:0.448, pOthers:0.047, pUnd:0.085, method:"ARS", responseRate:5.9, sourceUrl:"https://www.ajunews.com/view/20260522165714432"},
+    {city:"서울시장", date:"2026-05-21", pollster:"KSOI", client:"CBS", n:1010, candDem:"정원오", pDem:0.474, candPP:"오세훈", pPP:0.419, pOthers:0, pUnd:0.107, method:"무선전화", responseRate:5.6, sourceUrl:"https://www.nocutnews.co.kr/news/6521242"},
+    {city:"서울시장", date:"2026-05-25", pollster:"한국리서치", client:"KBS", n:800, candDem:"정원오", pDem:0.42, candPP:"오세훈", pPP:0.36, pOthers:0.03, pUnd:0.19, method:"전화면접", responseRate:13.9, sourceUrl:"https://www.dt.co.kr/article/12064410"},
+    {city:"서울시장", date:"2026-05-25", pollster:"리얼미터", client:"뉴스핌", n:803, candDem:"정원오", pDem:0.488, candPP:"오세훈", pPP:0.414, pOthers:0.041, pUnd:0.057, method:"ARS", responseRate:6.7, sourceUrl:"https://www.newspim.com/news/view/20260526001023"},
+    {city:"성남시장", date:"2026-02-09", pollster:"한길리서치", client:"뉴스1", n:503, candDem:"김병욱", pDem:0.32, candPP:"신상진", pPP:0.35, pOthers:0, pUnd:0.33, method:"ARS", responseRate:9.2, sourceUrl:"https://www.news1.kr/local/gyeonggi/6066685"},
+    {city:"성남시장", date:"2026-04-04", pollster:"한국갤럽", client:"경인일보", n:503, candDem:"김병욱", pDem:0.48, candPP:"신상진", pPP:0.33, pOthers:0, pUnd:0.19, method:"전화면접", responseRate:12.6, sourceUrl:"https://www.kyeongin.com/article/1763058"},
+    {city:"성남시장", date:"2026-04-26", pollster:"한길리서치", client:"인천일보", n:503, candDem:"김병욱", pDem:0.436, candPP:"신상진", pPP:0.382, pOthers:0, pUnd:0.182, method:"ARS", responseRate:9.5, sourceUrl:"https://v.daum.net/v/20260428060013997"},
+    {city:"성남시장", date:"2026-05-10", pollster:"조원씨앤아이", client:"경기일보", n:500, candDem:"김병욱", pDem:0.485, candPP:"신상진", pPP:0.401, pOthers:0.065, pUnd:0.049, method:"ARS", responseRate:7.7, sourceUrl:"https://www.kyeonggi.com/article/20260512580470"},
+    {city:"성남시장", date:"2026-05-19", pollster:"미디어리서치", client:"경기신문", n:800, candDem:"김병욱", pDem:0.447, candPP:"신상진", pPP:0.475, pOthers:0.008, pUnd:0.07, method:"ARS", responseRate:4.4, sourceUrl:"https://www.kgnews.co.kr/news/article.html?no=896626"},
+    {city:"성남시장", date:"2026-05-24", pollster:"KOPRA", client:"인싸잇경기", n:500, candDem:"김병욱", pDem:0.43, candPP:"신상진", pPP:0.42, pOthers:0.02, pUnd:0.13, method:"ARS", responseRate:4.1, sourceUrl:"https://www.mediawatch.kr/news/article.html?no=259746"},
+    {city:"성남시장", date:"2026-05-24", pollster:"여론조사공정", client:"펜앤마이크", n:801, candDem:"김병욱", pDem:0.424, candPP:"신상진", pPP:0.455, pOthers:0.033, pUnd:0.088, method:"ARS", responseRate:4.1, sourceUrl:"https://www.pennmike.com/news/articleView.html?idxno=121053"},
+    {city:"부산시장", date:"2026-04-04", pollster:"한길리서치", client:"부산일보", n:1004, candDem:"전재수", pDem:0.48, candPP:"박형준", pPP:0.349, pOthers:0, pUnd:0.171, method:"ARS", responseRate:9.8, sourceUrl:"https://www.busan.com"},
+    {city:"부산시장", date:"2026-04-19", pollster:"KSOI", client:"KBS부산", n:1000, candDem:"전재수", pDem:0.4, candPP:"박형준", pPP:0.34, pOthers:0, pUnd:0.26, method:"전화면접+ARS", responseRate:11.2, sourceUrl:"https://news.kbs.co.kr/news/pc/view/view.do"},
+    {city:"부산시장", date:"2026-04-25", pollster:"제이투인사이트랩", client:"?", n:1000, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.437, pOthers:0, pUnd:0.124, method:"ARS", responseRate:8.8, sourceUrl:"https://www.viva100.com/article/20260427500342"},
+    {city:"부산시장", date:"2026-04-26", pollster:"바로미터연구소", client:"?", n:1010, candDem:"전재수", pDem:0.439, candPP:"박형준", pPP:0.392, pOthers:0, pUnd:0.169, method:"ARS", responseRate:9, sourceUrl:"https://www.koreaeaglenews.com/news/articleView.html?idxno=99369"},
+    {city:"부산시장", date:"2026-04-29", pollster:"코리아리서치", client:"MBC", n:800, candDem:"전재수", pDem:0.48, candPP:"박형준", pPP:0.34, pOthers:0, pUnd:0.18, method:"전화면접+ARS", responseRate:11.5, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6819191_36911.html"},
+    {city:"부산시장", date:"2026-05-02", pollster:"한길리서치", client:"부산MBC", n:800, candDem:"전재수", pDem:0.469, candPP:"박형준", pPP:0.407, pOthers:0, pUnd:0.124, method:"ARS", responseRate:10.5, sourceUrl:"https://www.dailian.co.kr/news/view/1640728"},
+    {city:"부산시장", date:"2026-05-17", pollster:"코리아리서치", client:"MBC", n:800, candDem:"전재수", pDem:0.44, candPP:"박형준", pPP:0.38, pOthers:0.02, pUnd:0.16, method:"전화면접", responseRate:18.3, sourceUrl:"https://imnews.imbc.com/news/2026/politics/article/6823378_36911.html"},
+    {city:"부산시장", date:"2026-05-24", pollster:"리얼미터", client:"뉴스핌", n:805, candDem:"전재수", pDem:0.448, candPP:"박형준", pPP:0.428, pOthers:0, pUnd:0.124, method:"ARS", responseRate:8.5, sourceUrl:"https://www.newspim.com/news/view/20260525000215"},
+    {city:"부산시장", date:"2026-05-24", pollster:"에이스리서치", client:"부산일보", n:1002, candDem:"전재수", pDem:0.474, candPP:"박형준", pPP:0.415, pOthers:0.035, pUnd:0.076, method:"ARS", responseRate:7.6, sourceUrl:"https://nwww.newsis.com/view/NISX20260526_0003643281"},
   ]
 };
+// EMBEDDED-END
 
 // House Effect (의뢰처 편향) 가중치 — 메타분석에서 538.com 등이 사용하는 방식
 // 기본 1.0, 의심스러운 의뢰처는 < 1.0 으로 디스카운트
@@ -767,6 +845,40 @@ function citySummary(city) {
            se, diff, Z, pVal, candDem, candPP, winner, scenarios };
 }
 
+// ============== 양자/다자 분할 (편향 점검) ==============
+// pOthers > 0 → 다자대결 (제3후보 포함), == 0 → 양자대결
+function isYangja(p) { return (p.pOthers ?? 0) === 0; }
+
+function citySplit(city) {
+  const polls = POLLS.filter(p => p.city === city);
+  if (!polls.length) return null;
+  const candDem = polls[0].candDem, candPP = polls[0].candPP;
+
+  const yangja = polls.filter(isYangja);
+  const daja   = polls.filter(p => !isYangja(p));
+  // 후보확정 후 다자 = 다자 중 일정 날짜 이후. 서울은 2026-04-15 후보확정으로 가정.
+  const recentDaja = daja.filter(p => p.date >= "2026-04-15");
+
+  function aggregate(subset) {
+    if (!subset.length) return null;
+    const ws = subset.map(p => effectiveN(p));
+    const W = ws.reduce((s,w) => s + w, 0);
+    const pDem = subset.reduce((s,p,i) => s + p.pDem * ws[i], 0) / W;
+    const pPP  = subset.reduce((s,p,i) => s + p.pPP  * ws[i], 0) / W;
+    const se   = diffSE(pDem, pPP, W);
+    const diff = pDem - pPP;
+    const Z = se > 0 ? diff / se : 0;
+    const pVal = 1 - Phi(Z);
+    return { n: subset.length, W, pDem, pPP, diff, se, Z, pVal };
+  }
+  return {
+    candDem, candPP,
+    yangja: aggregate(yangja),
+    daja:   aggregate(daja),
+    recentDaja: aggregate(recentDaja),
+  };
+}
+
 // ============== 도시 탭 ==============
 function renderTabs() {
   const el = document.getElementById("city-tabs");
@@ -813,12 +925,20 @@ function renderCompare() {
 // ============== Hero ==============
 function renderHero() {
   const s = citySummary(currentCity);
+  const sp = citySplit(currentCity);
   document.getElementById("hero-title").textContent =
     `${currentCity} 선거 당선 예측 — ${s.candDem} vs ${s.candPP}`;
   const decisive = Math.abs(s.diff) > Z95 * s.se;
+
+  // 양자/다자 분할 격차도 함께 표시 (편향 점검)
+  let splitTxt = "";
+  if (sp && sp.yangja && sp.recentDaja) {
+    splitTxt = ` <span style="opacity:.75; font-size:13px;">— 양자 ${sp.yangja.diff>0?'+':''}${(sp.yangja.diff*100).toFixed(1)}%p / 다자(후보확정 후) ${sp.recentDaja.diff>0?'+':''}${(sp.recentDaja.diff*100).toFixed(1)}%p</span>`;
+  }
+
   const verdict = decisive
-    ? `<strong>${s.winner} 우세</strong> · 오차범위 밖 (p-value = ${s.pVal.toExponential(2)})`
-    : `<strong>${s.winner} 근소 우위</strong> · 오차범위 내 접전 (p-value = ${s.pVal.toExponential(2)})`;
+    ? `<strong>${s.winner} 우세</strong> · 통합 격차 ${s.diff>0?'+':''}${(s.diff*100).toFixed(1)}%p${splitTxt}`
+    : `<strong>${s.winner} 근소 우위</strong> · 오차범위 내 접전${splitTxt}`;
   document.getElementById("hero-verdict").innerHTML =
     `<span class="dot" style="background:${decisive?'#4ade80':'#fbbf24'}"></span>${verdict}`;
 }
@@ -867,6 +987,180 @@ function renderKPI() {
   `;
 }
 
+// ============== 양자/다자 분할 카드 ==============
+function renderBallotSplit() {
+  const card = document.getElementById("ballot-split-card");
+  const split = citySplit(currentCity);
+  if (!split || (!split.yangja && !split.daja)) { card.style.display = "none"; return; }
+  card.style.display = "";
+
+  function tile(label, sub, agg, kind, recommended=false) {
+    if (!agg) {
+      return `<div class="split-tile ${kind}"><div class="split-lbl">${label}</div>
+        <div class="split-n">${sub}</div>
+        <div class="split-gap" style="color:#cbd5e1; font-size:14px; margin-top:14px;">데이터 없음</div></div>`;
+    }
+    const sign = agg.diff > 0 ? "+" : "";
+    const winner = agg.diff > 0 ? split.candDem : split.candPP;
+    const pStr = agg.pVal < 1e-6 ? agg.pVal.toExponential(1) : agg.pVal.toFixed(4);
+    return `
+      <div class="split-tile ${kind}${recommended?' recommended':''}">
+        <div class="split-lbl">${label}${recommended?' ★':''}</div>
+        <div class="split-n">${sub} · n_eff(가중) = ${Math.round(agg.W).toLocaleString()}</div>
+        <div class="split-gap">${winner} ${sign}${(agg.diff*100).toFixed(2)}%p</div>
+        <div class="split-pct">${split.candDem} ${(agg.pDem*100).toFixed(1)}% · ${split.candPP} ${(agg.pPP*100).toFixed(1)}%</div>
+        <div class="split-stat">Z = ${agg.Z.toFixed(2)} · p = ${pStr}</div>
+      </div>`;
+  }
+
+  const el = document.getElementById("ballot-split");
+  el.innerHTML = [
+    tile("양자대결", `${split.yangja?.n ?? 0}건 합산`, split.yangja, "yangja"),
+    tile("다자대결 (후보확정 후)", `${split.recentDaja?.n ?? 0}건 — 실제 선거 구도`, split.recentDaja, "daja", true),
+    tile("통합 합산", `${(split.yangja?.n ?? 0) + (split.daja?.n ?? 0)}건 전체`,
+         {  // 통합값은 citySummary 와 동일
+           n: 0,
+           W: citySummary(currentCity).W,
+           pDem: citySummary(currentCity).pDem,
+           pPP: citySummary(currentCity).pPP,
+           diff: citySummary(currentCity).diff,
+           se: citySummary(currentCity).se,
+           Z: citySummary(currentCity).Z,
+           pVal: citySummary(currentCity).pVal,
+         }, "yangja"),
+  ].join("");
+
+  document.getElementById("ballot-split-note").innerHTML =
+    `★ <strong>실제 6/3 투표용지는 다자 구도</strong>이므로 다자만 추정치가 모집단 추정으로 가장 적절. ` +
+    `양자대결 결과는 보조 수치 — 통합 합산은 양자에 무게가 실리는 경향이 있음.`;
+}
+
+// ============== 방송사별 그룹 집계 (NEW) ==============
+// 지역 계열사는 본사로 통합 (KBS부산 → KBS, 부산MBC → MBC)
+const BROADCASTER_GROUPS = [
+  { key: "KBS", clients: ["KBS", "KBS부산"] },
+  { key: "MBC", clients: ["MBC", "부산MBC"] },
+  { key: "SBS", clients: ["SBS"] },
+  { key: "CBS", clients: ["CBS"] },
+];
+
+// 부분집합 폴들을 표본수 가중평균으로 합성 (시간감쇠·House Effect 미적용 — 단순 n-가중)
+function aggregateBySamples(polls) {
+  if (!polls || polls.length === 0) return null;
+  const W = polls.reduce((s, p) => s + p.n, 0);
+  const pDem = polls.reduce((s, p) => s + p.pDem * p.n, 0) / W;
+  const pPP  = polls.reduce((s, p) => s + p.pPP  * p.n, 0) / W;
+  const se = diffSE(pDem, pPP, W);
+  const diff = pDem - pPP;
+  const Z = se > 0 ? diff / se : 0;
+  const pVal = 1 - Phi(Z);
+  return { n: polls.length, W, pDem, pPP, se, diff, Z, pVal };
+}
+
+function renderBroadcaster() {
+  const polls = POLLS.filter(p => p.city === currentCity);
+  if (!polls.length) return;
+  const candDem = polls[0].candDem;
+  const candPP = polls[0].candPP;
+
+  // 방송사별 부분집합 + 집계
+  const groups = BROADCASTER_GROUPS.map(g => {
+    const sub = polls.filter(p => g.clients.includes(p.client));
+    return { key: g.key, sub, agg: aggregateBySamples(sub) };
+  });
+  const totalAgg = aggregateBySamples(polls);
+  const hasAnyBroadcaster = groups.some(g => g.sub.length > 0);
+
+  // ─── 카드 그리드 ───
+  const grid = document.getElementById("broadcaster-grid");
+  document.getElementById("broadcaster-empty").style.display = hasAnyBroadcaster ? "none" : "";
+
+  function tile(label, sub, agg, isTotal) {
+    if (!agg) {
+      return `<div class="split-tile"><div class="split-lbl">${label}</div>
+        <div class="split-n">데이터 없음</div>
+        <div class="split-gap" style="color:#cbd5e1; font-size:14px; margin-top:14px;">—</div>
+        <div class="split-stat" style="margin-top:8px;">의뢰 폴 없음</div></div>`;
+    }
+    const sign = agg.diff > 0 ? "+" : "";
+    const winner = agg.diff > 0 ? candDem : candPP;
+    const winnerCol = agg.diff > 0 ? "var(--dem)" : "var(--pp)";
+    const pStr = agg.pVal < 1e-6 ? agg.pVal.toExponential(1) : agg.pVal.toFixed(4);
+    const moDem = Z95 * Math.sqrt(agg.pDem * (1 - agg.pDem) / agg.W) * 100;
+    const moPP  = Z95 * Math.sqrt(agg.pPP  * (1 - agg.pPP)  / agg.W) * 100;
+    const recCls = isTotal ? " recommended" : "";
+    return `
+      <div class="split-tile${recCls}">
+        <div class="split-lbl">${label}${isTotal ? ' ★' : ''}</div>
+        <div class="split-n">${sub.length}건 · n 합계 ${agg.W.toLocaleString()}</div>
+        <div class="split-gap" style="color:${winnerCol}">${winner} ${sign}${(agg.diff*100).toFixed(2)}%p</div>
+        <div class="split-pct">
+          <span style="color:var(--dem)">${candDem} ${(agg.pDem*100).toFixed(1)}%</span>
+          (±${moDem.toFixed(2)}%p) ·
+          <span style="color:var(--pp)">${candPP} ${(agg.pPP*100).toFixed(1)}%</span>
+          (±${moPP.toFixed(2)}%p)
+        </div>
+        <div class="split-stat">Z=${agg.Z.toFixed(2)} · p=${pStr}</div>
+      </div>`;
+  }
+
+  const tiles = groups.map(g => tile(g.key, g.sub, g.agg, false));
+  tiles.push(tile("NESDC 등록 전체", polls, totalAgg, true));
+
+  grid.style.cssText =
+    "display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:10px;";
+  grid.innerHTML = tiles.join("");
+
+  // ─── 막대그래프 ───
+  // 데이터 있는 방송사만 + NESDC 전체 (맨 끝)
+  const validGroups = groups.filter(g => g.agg);
+  const labels = [...validGroups.map(g => g.key), "NESDC 전체"];
+  const yDem = [...validGroups.map(g => g.agg.pDem * 100), totalAgg.pDem * 100];
+  const yPP  = [...validGroups.map(g => g.agg.pPP  * 100), totalAgg.pPP  * 100];
+  const counts = [
+    ...validGroups.map(g => `${g.sub.length}건 · n=${g.agg.W.toLocaleString()}`),
+    `${polls.length}건 · n=${totalAgg.W.toLocaleString()}`,
+  ];
+
+  const traces = [
+    { x: labels, y: yDem, type: "bar", name: `${candDem} (민주당)`,
+      marker: { color: "#2E7DD7" },
+      text: yDem.map(v => v.toFixed(1) + "%"),
+      textposition: "outside", textfont: { size: 11, color: "#1e4f8a" },
+      customdata: counts,
+      hovertemplate: `<b>%{x}</b><br>${candDem}: %{y:.1f}%<br>%{customdata}<extra></extra>` },
+    { x: labels, y: yPP, type: "bar", name: `${candPP} (국민의힘)`,
+      marker: { color: "#E03131" },
+      text: yPP.map(v => v.toFixed(1) + "%"),
+      textposition: "outside", textfont: { size: 11, color: "#991b1b" },
+      customdata: counts,
+      hovertemplate: `<b>%{x}</b><br>${candPP}: %{y:.1f}%<br>%{customdata}<extra></extra>` },
+  ];
+
+  const yMax = Math.max(...yDem, ...yPP) + 10;
+  const lastIdx = labels.length - 1;
+  Plotly.newPlot("broadcaster-chart", traces, {
+    barmode: "group",
+    margin: { t: 30, r: 20, b: 60, l: 55 },
+    xaxis: { gridcolor: "#eef0f4", tickfont: { size: 12 } },
+    yaxis: { title: "가중평균 지지율 (%)", gridcolor: "#eef0f4", range: [0, yMax] },
+    legend: { orientation: "h", x: 0.5, xanchor: "center", y: -0.15 },
+    plot_bgcolor: "white", paper_bgcolor: "white",
+    font: { family: "Malgun Gothic, sans-serif" },
+    shapes: [
+      // NESDC 전체 열 배경 강조
+      { type: "rect", xref: "x", yref: "paper",
+        x0: lastIdx - 0.5, x1: lastIdx + 0.5, y0: 0, y1: 1,
+        fillcolor: "rgba(67,56,202,0.06)", line: { width: 0 }, layer: "below" },
+    ],
+    annotations: [
+      { xref: "x", yref: "paper", x: lastIdx, y: 1.02, xanchor: "center",
+        text: "★ 전체 평균", showarrow: false,
+        font: { size: 10, color: "#4338ca", weight: 700 } },
+    ],
+  }, { responsive: true, displaylogo: false });
+}
+
 // ============== 부동층 결집 시나리오 ==============
 function renderScenarios() {
   const s = citySummary(currentCity);
@@ -903,42 +1197,82 @@ function renderTrend() {
   const polls = POLLS.filter(p => p.city === currentCity)
                      .sort((a,b) => a.date.localeCompare(b.date));
   const candDem = polls[0].candDem, candPP = polls[0].candPP;
-  const dates = polls.map(p => p.date);
+
+  // 같은 날짜에 여러 폴이 있으면 시간으로 분산 (jitter) — 라벨 겹침 방지
+  const dateCounts = {};
+  polls.forEach(p => { dateCounts[p.date] = (dateCounts[p.date] || 0) + 1; });
+  const dateUsed = {};
+  const xDates = polls.map(p => {
+    dateUsed[p.date] = (dateUsed[p.date] || 0) + 1;
+    const total = dateCounts[p.date];
+    if (total === 1) return p.date;
+    // 여러 개면 24시간 안에 균등 분산 (예: 2건 → 08:00, 16:00)
+    const hour = Math.round(24 * dateUsed[p.date] / (total + 1));
+    return p.date + ` ${String(hour).padStart(2,'0')}:00`;
+  });
+
   const yDem = polls.map(p => p.pDem * 100);
   const yPP  = polls.map(p => p.pPP  * 100);
   const eDem = polls.map(p => moe(p.pDem, p.n) * 100);
   const ePP  = polls.map(p => moe(p.pPP,  p.n) * 100);
 
   const traces = [
-    { x:dates, y:yDem.map((v,i)=>v+eDem[i]), mode:"lines", line:{width:0}, showlegend:false, hoverinfo:"skip" },
-    { x:dates, y:yDem.map((v,i)=>v-eDem[i]), mode:"lines", line:{width:0},
-      fill:"tonexty", fillcolor:"rgba(46,125,215,0.18)", name:`${candDem} 95% CI`, hoverinfo:"skip" },
-    { x:dates, y:yPP.map((v,i)=>v+ePP[i]), mode:"lines", line:{width:0}, showlegend:false, hoverinfo:"skip" },
-    { x:dates, y:yPP.map((v,i)=>v-ePP[i]), mode:"lines", line:{width:0},
-      fill:"tonexty", fillcolor:"rgba(224,49,49,0.18)", name:`${candPP} 95% CI`, hoverinfo:"skip" },
-    { x:dates, y:yDem, mode:"lines+markers+text", name:`${candDem} (민주당)`,
-      line:{color:"#2E7DD7", width:3}, marker:{size:11},
-      text:yDem.map(v=>v.toFixed(0)+"%"), textposition:"top center",
-      hovertemplate:`<b>%{x}</b><br>${candDem}: %{y:.1f}%<br>±%{customdata:.2f}%p<extra></extra>`,
-      customdata:eDem },
-    { x:dates, y:yPP, mode:"lines+markers+text", name:`${candPP} (국민의힘)`,
-      line:{color:"#E03131", width:3}, marker:{size:11, symbol:"square"},
-      text:yPP.map(v=>v.toFixed(0)+"%"), textposition:"bottom center",
-      hovertemplate:`<b>%{x}</b><br>${candPP}: %{y:.1f}%<br>±%{customdata:.2f}%p<extra></extra>`,
-      customdata:ePP },
+    { x:xDates, y:yDem.map((v,i)=>v+eDem[i]), mode:"lines", line:{width:0}, showlegend:false, hoverinfo:"skip" },
+    { x:xDates, y:yDem.map((v,i)=>v-eDem[i]), mode:"lines", line:{width:0},
+      fill:"tonexty", fillcolor:"rgba(46,125,215,0.15)", name:`${candDem} 95% CI`, hoverinfo:"skip" },
+    { x:xDates, y:yPP.map((v,i)=>v+ePP[i]), mode:"lines", line:{width:0}, showlegend:false, hoverinfo:"skip" },
+    { x:xDates, y:yPP.map((v,i)=>v-ePP[i]), mode:"lines", line:{width:0},
+      fill:"tonexty", fillcolor:"rgba(224,49,49,0.15)", name:`${candPP} 95% CI`, hoverinfo:"skip" },
+    { x:xDates, y:yDem, mode:"lines+markers+text", name:`${candDem} (민주당)`,
+      line:{color:"#2E7DD7", width:2.5},
+      marker:{size:10, color:"#2E7DD7", line:{color:"white", width:1.5}},
+      text:yDem.map(v=>v.toFixed(1)+"%"),
+      textposition:"top center",
+      textfont:{size:11, color:"#1e4f8a"},
+      hovertemplate:`<b>%{customdata[0]}</b> %{customdata[2]}<br>${candDem}: %{y:.1f}% ±%{customdata[1]:.2f}%p<br>n=%{customdata[3]}<extra></extra>`,
+      customdata:polls.map((p,i)=>[p.date, eDem[i], p.client, p.n]) },
+    { x:xDates, y:yPP, mode:"lines+markers+text", name:`${candPP} (국민의힘)`,
+      line:{color:"#E03131", width:2.5},
+      marker:{size:10, color:"#E03131", symbol:"square", line:{color:"white", width:1.5}},
+      text:yPP.map(v=>v.toFixed(1)+"%"),
+      textposition:"bottom center",
+      textfont:{size:11, color:"#991b1b"},
+      hovertemplate:`<b>%{customdata[0]}</b> %{customdata[2]}<br>${candPP}: %{y:.1f}% ±%{customdata[1]:.2f}%p<br>n=%{customdata[3]}<extra></extra>`,
+      customdata:polls.map((p,i)=>[p.date, ePP[i], p.client, p.n]) },
   ];
 
-  // y축 범위 동적 계산
+  // y축 범위 동적 계산 — 라벨 위/아래 여백 확보
   const allY = [...yDem.map((v,i)=>v+eDem[i]), ...yPP.map((v,i)=>v+ePP[i])];
   const allYL= [...yDem.map((v,i)=>v-eDem[i]), ...yPP.map((v,i)=>v-ePP[i])];
-  const yMin = Math.floor(Math.min(...allYL) - 3);
-  const yMax = Math.ceil(Math.max(...allY) + 3);
+  const yMin = Math.floor(Math.min(...allYL) - 4);
+  const yMax = Math.ceil(Math.max(...allY) + 5);
+
+  // 기본 줌: 최근 2주 (최신 부분이 잘 보이게)
+  // 우측에 1.5일 여백 — 마지막 폴 라벨이 차트 우측 끝에 매달려 짤리지 않게
+  const lastPollD = new Date(polls[polls.length-1].date + "T12:00:00+09:00");
+  const lastD = new Date(lastPollD.getTime() + 1.5 * 86400000);
+  const start14 = new Date(lastD.getTime() - 15.5 * 86400000);
 
   const layout = {
-    margin:{t:20, r:20, b:50, l:50},
+    margin:{t:60, r:30, b:50, l:55},
     yaxis:{title:"지지율 (%)", range:[yMin, yMax], gridcolor:"#eef0f4"},
-    xaxis:{title:"조사일", gridcolor:"#eef0f4"},
-    legend:{orientation:"h", x:0.5, xanchor:"center", y:-0.18},
+    xaxis:{
+      title:"조사일",
+      gridcolor:"#eef0f4",
+      type:"date",
+      range:[start14.toISOString(), lastD.toISOString()],   // 기본 2주 줌
+      rangeselector:{
+        buttons:[
+          {step:"day",   count:7,  label:"1주",  stepmode:"backward"},
+          {step:"day",   count:14, label:"2주",  stepmode:"backward"},
+          {step:"month", count:1,  label:"1달",  stepmode:"backward"},
+          {step:"all",   label:"전체"},
+        ],
+        bgcolor:"#f3f4f6", activecolor:"#2E7DD7",
+        font:{size:11}, y:1.10, x:0,
+      },
+    },
+    legend:{orientation:"h", x:0.5, xanchor:"center", y:-0.32},
     plot_bgcolor:"white", paper_bgcolor:"white",
     font:{family:"Malgun Gothic, sans-serif"},
   };
@@ -946,15 +1280,36 @@ function renderTrend() {
 }
 
 // ============== 차트 2: CI compare ==============
+let CI_PERIOD_DAYS = 14;  // 기본 최근 2주
+
 function renderCI() {
-  const polls = POLLS.filter(p => p.city === currentCity)
-                     .sort((a,b) => b.date.localeCompare(a.date));
+  const allPolls = POLLS.filter(p => p.city === currentCity)
+                        .sort((a,b) => b.date.localeCompare(a.date));
+  // 기간 필터 — 가장 최근 폴 날짜 기준으로 N일 이내
+  let polls = allPolls;
+  if (CI_PERIOD_DAYS < 9999 && allPolls.length > 0) {
+    const lastD = new Date(allPolls[0].date + "T23:59:00+09:00");
+    const cutoff = new Date(lastD.getTime() - CI_PERIOD_DAYS * 86400000);
+    polls = allPolls.filter(p => new Date(p.date + "T00:00:00+09:00") >= cutoff);
+  }
+
+  // 빈 기간 처리
+  const emptyNote = document.getElementById("ci-empty-note");
+  const chartEl = document.getElementById("chart-ci");
+  if (polls.length === 0) {
+    chartEl.innerHTML = "";
+    chartEl.style.height = "60px";
+    emptyNote.style.display = "";
+    return;
+  }
+  emptyNote.style.display = "none";
+
   const candDem = polls[0].candDem, candPP = polls[0].candPP;
   const labels = polls.map(p => `${p.date}<br>(${p.client})`);
 
   // 폴 수가 늘면 컨테이너 높이를 비례 확장 — 라벨 겹침 방지 (폴당 약 40px + 여백)
-  const ciHeight = Math.max(460, polls.length * 40 + 120);
-  document.getElementById("chart-ci").style.height = ciHeight + "px";
+  const ciHeight = Math.max(280, polls.length * 40 + 120);
+  chartEl.style.height = ciHeight + "px";
   const yPos  = polls.map((_,i) => i);
   const yDemP = yPos.map(y => y + 0.18);
   const yPPP  = yPos.map(y => y - 0.18);
@@ -1153,6 +1508,8 @@ function renderTable() {
       ? `<a class="src-link" href="${url}" target="_blank" rel="noopener" title="${url}">기사 ↗</a>`
       : `<span class="src-link empty">—</span>`;
 
+    const ballotKind = isYangja(p) ? "yangja" : "daja";
+    const ballotLbl = isYangja(p) ? "양자" : `다자(+${((p.pOthers ?? 0)*100).toFixed(1)}%)`;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${p.date}</td>
@@ -1161,6 +1518,7 @@ function renderTable() {
       <td>${p.n.toLocaleString()}</td>
       <td style="color:var(--muted)">${respRate}</td>
       <td style="color:var(--muted); font-size:11px">${method}</td>
+      <td><span class="badge ${ballotKind}">${ballotLbl}</span></td>
       <td style="color:var(--dem); font-weight:600">${(p.pDem*100).toFixed(1)}%</td>
       <td style="color:var(--pp); font-weight:600">${(p.pPP*100).toFixed(1)}%</td>
       <td style="color:#d97706">${(pUnd*100).toFixed(1)}%</td>
@@ -1419,11 +1777,13 @@ function renderAll() {
   renderCompare();
   renderHero();
   renderKPI();
+  renderBallotSplit();
   renderScenarios();
   renderTrend();
   renderCI();
   renderCLT();
   renderHypothesis();
+  renderBroadcaster();
   renderTable();
   renderAge();
   renderActualSection();
@@ -1440,6 +1800,16 @@ async function refresh() {
 }
 
 document.getElementById("refresh-btn").addEventListener("click", refresh);
+
+// ② CI 비교 차트 기간 토글
+document.querySelectorAll("#ci-period-toggle button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#ci-period-toggle button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    CI_PERIOD_DAYS = parseInt(btn.dataset.days, 10);
+    renderCI();
+  });
+});
 
 // 첫 로드
 refresh();

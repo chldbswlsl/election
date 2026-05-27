@@ -5,3 +5,21 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# 산출물 — 코드만 GitHub 에 올림 (보고서·발표 자료 제외)
+*.docx
+*.pptx
+
+# 학교 과제 narrative (README.md 와 별도, GitHub 공개 안 함)
+REPORT.md
+
+# 보고서 생성기 코드 — 보고서 용도라 GitHub 에 안 올림
+generate_docx.py
+generate_pptx.py
+generate_script_docx.py
+
+# 보고서 임베드용 정적 차트 — 필요 시 `python make_charts.py` 로 재생성
+charts/
+
+# 무관 실험 파일
+test.html
